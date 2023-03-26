@@ -308,8 +308,13 @@ public final class Laudiolin {
             isLastInterrupted = false;
 
             try {
+                // Parse the input.
+                var split = input.split(" ");
+                var label = split[0].trim().toLowerCase();
+                var arguments = Arrays.copyOfRange(split, 1, split.length);
+
                 // Invoke the command.
-                // TODO: Invoke commands.
+                Command.execute(label, Arrays.asList(arguments));
             } catch (Exception e) {
                 logger.warn("An error occurred while trying to invoke command.", e);
             }
