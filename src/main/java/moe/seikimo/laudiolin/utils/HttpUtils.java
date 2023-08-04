@@ -1,7 +1,6 @@
 package moe.seikimo.laudiolin.utils;
 
 import com.google.gson.JsonObject;
-import lombok.Getter;
 import moe.seikimo.laudiolin.objects.JObject;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
