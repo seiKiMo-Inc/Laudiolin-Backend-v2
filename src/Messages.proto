@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+option java_package = "moe.seikimo.laudiolin";
+
+enum PacketIds {
+  _Request = 0;
+  _YouTubeSearchReq = 1;
+  _YouTubeSearchRsp = 2;
+  _YouTubeDownloadReq = 3;
+  _YouTubeDownloadRsp = 4;
+}
+
+message SearchResult {
+  string id = 1;
+  string title = 2;
+  repeated string artists = 3;
+  string icon = 4;
+  string url = 5;
+  uint32 duration = 6;
+}
+
+/* Messages */
+
+message YouTubeSearchReq {
+  string query = 1;
+  bool youtube_music = 2;
+}
+
+message YouTubeSearchRsp {
+  bool successful = 1;
+  repeated SearchResult results = 2;
+}
+
+message YouTubeDownloadReq {
+  string video_id = 1;
+}
+
+message YouTubeDownloadRsp {
+  string file_path = 1;
+}

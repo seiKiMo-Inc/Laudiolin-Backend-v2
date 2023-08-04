@@ -1,0 +1,26 @@
+{
+  "name": "laudiolin-backend",
+  "description": "Laudiolin Backend Node module.",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start:dev": "ts-node-dev -r tsconfig-paths/register src/index.ts"
+  },
+  "dependencies": {
+    "tslog": "^4.8.2",
+    "node-ipc": "^11.1.0",
+    "youtubei.js": "^5.8.0",
+    "fluent-ffmpeg": "^2.1.2",
+    "@protobuf-ts/runtime": "^2.9.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.1.6",
+    "@types/node": "^20.4.6",
+    "@types/node-ipc": "^9.2.0",
+    "@types/fluent-ffmpeg": "^2.1.21",
+
+    "tsconfig-paths": "^4.2.0",
+
+    "prettier": "^3.0.1"
+  }
+}
