@@ -1,6 +1,7 @@
 package moe.seikimo.laudiolin.routers;
 
 import io.javalin.Javalin;
+import io.javalin.http.ContentType;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import moe.seikimo.laudiolin.Laudiolin;
@@ -11,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 import static moe.seikimo.laudiolin.utils.HttpUtils.INVALID_ARGUMENTS;
+import static moe.seikimo.laudiolin.utils.HttpUtils.SUCCESS;
 
 public interface StreamRouter {
     /**
@@ -21,15 +23,16 @@ public interface StreamRouter {
     static void configure(Javalin javalin) {
         javalin.get("/download", StreamRouter::download);
         javalin.get("/stream", StreamRouter::stream);
-//        javalin.get("/cache", StreamRouter::cache);
+        javalin.get("/cache", StreamRouter::cache);
     }
 
     /**
-     * Downloads the specified video.
+     * Fetches the video path.
      *
      * @param ctx The context.
+     * @return The path.
      */
-    static void download(Context ctx) {
+    private static String fetchPathFor(Context ctx) {
         try {
             // Pull arguments.
             var id = ctx.queryParam("id");
@@ -38,14 +41,14 @@ public interface StreamRouter {
             // Validate arguments.
             if (id == null || id.isEmpty()) {
                 ctx.status(400).json(INVALID_ARGUMENTS());
-                return;
+                return null;
             }
 
             // Identify source.
             var source = Source.identify(engine, id);
             // Download the video.
             var node = Laudiolin.getNode();
-            var path = switch (source) {
+            return switch (source) {
                 case UNKNOWN -> "";
                 case ALL, YOUTUBE -> node.youtubeDownload(id);
                 case SPOTIFY -> {
@@ -55,6 +58,24 @@ public interface StreamRouter {
                     yield node.youtubeDownload(id);
                 }
             };
+        } catch (Exception exception) {
+            ctx.status(500);
+            Laudiolin.getLogger().warn("Failed to download video.", exception);
+
+            return null;
+        }
+    }
+
+    /**
+     * Downloads the specified video.
+     *
+     * @param ctx The context.
+     */
+    static void download(Context ctx) {
+        try {
+            // Fetch the path.
+            var path = StreamRouter.fetchPathFor(ctx);
+            if (path == null) return;
 
             // Validate the path.
             if (path.isEmpty()) {
@@ -63,8 +84,10 @@ public interface StreamRouter {
             }
 
             // Serve the file.
-            ctx.status(200).result(
-                    new FileInputStream(path));
+            ctx
+                    .status(200)
+                    .contentType(ContentType.AUDIO_MPEG)
+                    .result(new FileInputStream(path));
         } catch (Exception exception) {
             ctx.status(500);
             Laudiolin.getLogger().warn("Failed to download video.", exception);
@@ -154,5 +177,23 @@ public interface StreamRouter {
         try (var stream = ctx.outputStream()) {
             stream.write(buffer.toByteArray());
         } catch (IOException ignored) { }
+    }
+
+    /**
+     * Downloads the specified video.
+     * This only caches the song, it doesn't return it.
+     *
+     * @param ctx The context.
+     */
+    static void cache(Context ctx) {
+        try {
+            // Use the path method to download the video.
+            StreamRouter.fetchPathFor(ctx);
+            // Return the state.
+            ctx.status(200).json(SUCCESS());
+        } catch (Exception exception) {
+            ctx.status(500);
+            Laudiolin.getLogger().warn("Failed to download video.", exception);
+        }
     }
 }
