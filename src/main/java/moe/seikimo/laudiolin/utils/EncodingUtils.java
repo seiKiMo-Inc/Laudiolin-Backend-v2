@@ -8,6 +8,7 @@ import moe.seikimo.laudiolin.interfaces.DatabaseObject;
 
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 public interface EncodingUtils {
@@ -67,6 +68,16 @@ public interface EncodingUtils {
      */
     static String toString(Object object) {
         return EncodingUtils.jsonEncode(object);
+    }
+
+    /**
+     * Encodes bytes to Base64.
+     *
+     * @param bytes The bytes to encode.
+     * @return The encoded string.
+     */
+    static String base64Encode(byte[] bytes) {
+        return Base64.getEncoder().encodeToString(bytes);
     }
 
     /**

@@ -151,6 +151,32 @@ public interface SpotifyUtils {
                 .build();
     }
 
+    /**
+     * Converts a Spotify ISRC/ID to a YouTube video/ID.
+     *
+     * @param id The Spotify ISRC/ID to convert.
+     * @return The YouTube video/ID.
+     */
+    static String toYouTubeId(String id) {
+        var node = Laudiolin.getNode();
+
+        // Get the track by ID.
+        var track = id.length() == 12 ?
+                SpotifyUtils.searchIsrc(id) :
+                SpotifyUtils.searchSpotifyId(id);
+        if (track == null) return "";
+        var trackData = SpotifyUtils.toTrackData(track);
+
+        // Prepare a YouTube query.
+        var query = String.format("%s - %s - Topic",
+                trackData.getTitle(), trackData.getArtist());
+        // Perform a YouTube search.
+        var search = node.youtubeSearch(query, false);
+        if (search.isEmpty()) return "";
+
+        return search.get(0).getId();
+    }
+
     final class AuthorizeTask extends TimerTask {
         @Override
         public void run() {

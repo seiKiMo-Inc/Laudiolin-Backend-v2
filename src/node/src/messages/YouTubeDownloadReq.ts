@@ -7,26 +7,7 @@ import ffmpeg from "fluent-ffmpeg";
 import { join } from "path";
 
 import { youtube, storagePath } from "@app/index";
-import { extractId } from "@app/utils";
-
-/**
- * Converts a stream to an iterable.
- *
- * @param stream The stream to convert.
- */
-async function streamToIterable(stream: ReadableStream<Uint8Array>): Promise<Uint8Array> {
-    const reader = stream.getReader();
-    const chunks: Uint8Array[] = [];
-
-    while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        chunks.push(value);
-    }
-
-    return Uint8Array.from(chunks.flatMap(
-        chunk => Array.from(chunk)));
-}
+import { extractId, streamToIterable } from "@app/utils";
 
 /**
  * Handles the downloading of a YouTube video.

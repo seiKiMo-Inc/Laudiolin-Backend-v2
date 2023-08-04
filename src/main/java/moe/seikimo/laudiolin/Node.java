@@ -166,24 +166,6 @@ public final class Node {
     /* ---------------------------------------- UTILITY METHODS ---------------------------------------- */
 
     /**
-     * Attempts to download a YouTube video.
-     *
-     * @param id The YouTube video ID.
-     * @return The path to the downloaded video. Returns an empty string if the download failed.
-     */
-    @SneakyThrows
-    public String youtubeDownload(String id) {
-        // Send the packet and expect a response.
-        var data = this.sendExpect(
-                PacketIds._YouTubeDownloadReq,
-                YouTubeDownloadReq.newBuilder()
-                        .setVideoId(id));
-        var response = YouTubeDownloadRsp.parseFrom(data);
-
-        return response.getFilePath();
-    }
-
-    /**
      * Searches YouTube for a video.
      *
      * @param query The search query.
@@ -205,5 +187,47 @@ public final class Node {
             throw new RuntimeException("Failed to search YouTube.");
 
         return response.getResultsList();
+    }
+
+    /**
+     * Attempts to download a YouTube video.
+     *
+     * @param id The YouTube video ID.
+     * @return The path to the downloaded video. Returns an empty string if the download failed.
+     */
+    @SneakyThrows
+    public String youtubeDownload(String id) {
+        // Send the packet and expect a response.
+        var data = this.sendExpect(
+                PacketIds._YouTubeDownloadReq,
+                YouTubeDownloadReq.newBuilder()
+                        .setVideoId(id));
+        var response = YouTubeDownloadRsp.parseFrom(data);
+
+        return response.getFilePath();
+    }
+
+    /**
+     * Attempts to download a part of a YouTube video.
+     *
+     * @param id The YouTube video ID.
+     * @param quality The quality of the video.
+     * @param start The starting byte.
+     * @param end The ending byte.
+     * @return The download response.
+     */
+    @SneakyThrows
+    public YouTubeStreamRsp youtubeStream(
+            String id, String quality, int start, int end
+    ) {
+        // Send the packet and expect a response.
+        var data = this.sendExpect(
+                PacketIds._YouTubeStreamReq,
+                YouTubeStreamReq.newBuilder()
+                        .setVideoId(id)
+                        .setQuality(quality)
+                        .setStart(start)
+                        .setEnd(end));
+        return YouTubeStreamRsp.parseFrom(data);
     }
 }

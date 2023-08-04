@@ -12,6 +12,8 @@ import java.io.IOException;
 
 @SuppressWarnings("KotlinInternalInJava")
 public interface HttpUtils {
+    byte[] DIVIDER = "\r\n".getBytes();
+
     OkHttpClient CLIENT
             = new OkHttpClient.Builder()
             .addInterceptor(HttpUtils::interceptRequest)
@@ -52,6 +54,28 @@ public interface HttpUtils {
         } catch (IOException ignored) {
             return new byte[0];
         }
+    }
+
+    /**
+     * Creates an HTTP chunk based on the length of the array.
+     *
+     * @param bytes The bytes to chunk.
+     * @return The chunked bytes.
+     */
+    static byte[] createChunk(byte[] bytes) {
+        var length = String.valueOf(
+                bytes.length).getBytes();
+        var chunk = new byte[length.length +
+                bytes.length +
+                (DIVIDER.length * 2)];
+
+        // Write the data to the chunk.
+        System.arraycopy(length, 0, chunk, 0, length.length);
+        System.arraycopy(DIVIDER, 0, chunk, length.length, DIVIDER.length);
+        System.arraycopy(bytes, 0, chunk, length.length + DIVIDER.length, bytes.length);
+        System.arraycopy(DIVIDER, 0, chunk, length.length + DIVIDER.length + bytes.length, DIVIDER.length);
+
+        return chunk;
     }
 
     /**

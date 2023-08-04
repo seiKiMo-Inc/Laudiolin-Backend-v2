@@ -8,6 +8,8 @@ enum PacketIds {
   _YouTubeSearchRsp = 2;
   _YouTubeDownloadReq = 3;
   _YouTubeDownloadRsp = 4;
+  _YouTubeStreamReq = 5;
+  _YouTubeStreamRsp = 6;
 }
 
 message SearchResult {
@@ -37,4 +39,16 @@ message YouTubeDownloadReq {
 
 message YouTubeDownloadRsp {
   string file_path = 1;
+}
+
+message YouTubeStreamReq {
+  string video_id = 1;
+  uint32 start = 2;
+  uint32 end = 3;
+  string quality = 4;
+}
+
+message YouTubeStreamRsp {
+  bytes data = 1;
+  uint32 content_length = 2;
 }
