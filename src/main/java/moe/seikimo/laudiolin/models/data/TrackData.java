@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import dev.morphia.annotations.Entity;
 import lombok.Builder;
 import lombok.Data;
+import lombok.experimental.Accessors;
 import moe.seikimo.laudiolin.Messages;
 import moe.seikimo.laudiolin.objects.JObject;
 import moe.seikimo.laudiolin.utils.EncodingUtils;
@@ -13,7 +14,7 @@ import java.util.List;
 
 @Data
 @Entity
-@Builder
+@Accessors(chain = true)
 public class TrackData {
     @NotNull private String id;
     @NotNull private String title;
@@ -42,14 +43,13 @@ public class TrackData {
             artists.delete(artists.length() - 2, artists.length());
         }
 
-        return TrackData.builder()
-                .id(result.getId())
-                .title(result.getTitle())
-                .artist(artists.toString())
-                .icon(result.getIcon())
-                .url(result.getUrl())
-                .duration(result.getDuration())
-                .build();
+        return new TrackData()
+                .setId(result.getId())
+                .setTitle(result.getTitle())
+                .setArtist(artists.toString())
+                .setIcon(result.getIcon())
+                .setUrl(result.getUrl())
+                .setDuration(result.getDuration());
     }
 
     /**

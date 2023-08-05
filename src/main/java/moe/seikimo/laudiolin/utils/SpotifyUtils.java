@@ -144,14 +144,13 @@ public interface SpotifyUtils {
             artists.delete(artists.length() - 2, artists.length());
         }
 
-        return TrackData.builder()
-                .title(track.getName())
-                .artist(artists.toString())
-                .icon(track.getAlbum().getImages()[0].getUrl())
-                .id(track.getExternalIds().getExternalIds().get("isrc"))
-                .duration((int) Math.floor(track.getDurationMs() / 1000f))
-                .url(track.getExternalUrls().get("spotify"))
-                .build();
+        return new TrackData()
+                .setTitle(track.getName())
+                .setArtist(artists.toString())
+                .setIcon(track.getAlbum().getImages()[0].getUrl())
+                .setId(track.getExternalIds().getExternalIds().get("isrc"))
+                .setDuration((int) Math.floor(track.getDurationMs() / 1000f))
+                .setUrl(track.getExternalUrls().get("spotify"));
     }
 
     /**
