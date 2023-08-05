@@ -131,6 +131,7 @@ public final class Laudiolin {
 
                 // Configure routers.
                 SiteRouter.configure(javalin);
+                UserRouter.configure(javalin);
                 ProxyRouter.configure(javalin);
                 StreamRouter.configure(javalin);
                 SearchRouter.configure(javalin);
