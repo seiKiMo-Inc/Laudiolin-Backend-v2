@@ -7,6 +7,7 @@ import com.google.gson.JsonObject;
 import moe.seikimo.laudiolin.interfaces.DatabaseObject;
 
 import java.io.Reader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -26,6 +27,16 @@ public interface EncodingUtils {
      */
     static JsonElement toJson(Object object) {
         return GSON.toJsonTree(object);
+    }
+
+    /**
+     * Decodes an object from JSON.
+     *
+     * @param json The JSON to decode.
+     * @return The decoded object.
+     */
+    static JsonObject jsonDecode(String json) {
+        return GSON.fromJson(json, JsonObject.class);
     }
 
     /**
@@ -93,5 +104,20 @@ public interface EncodingUtils {
         }
 
         return list;
+    }
+
+    /**
+     * Validates a URL.
+     *
+     * @param url The URL to validate.
+     * @return Whether the URL is valid.
+     */
+    static boolean isValidUrl(String url) {
+        try {
+            new URL(url).toURI();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

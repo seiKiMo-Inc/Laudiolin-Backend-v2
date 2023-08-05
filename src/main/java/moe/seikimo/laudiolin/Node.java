@@ -3,6 +3,8 @@ package moe.seikimo.laudiolin;
 import com.google.protobuf.GeneratedMessageV3;
 import lombok.SneakyThrows;
 import moe.seikimo.laudiolin.Messages.*;
+import moe.seikimo.laudiolin.models.data.Playlist;
+import moe.seikimo.laudiolin.models.data.TrackData;
 import moe.seikimo.laudiolin.utils.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +27,6 @@ public final class Node {
             = LoggerFactory.getLogger("Node IPC");
 
     private final RandomAccessFile pipe;
-    private final Thread readThread;
 
     private final Map<Integer, Consumer<byte[]>> listeners = new HashMap<>();
 
@@ -37,8 +39,7 @@ public final class Node {
         this.pipe = new RandomAccessFile("\\\\?\\pipe\\" + name, "rw");
 
         // Create the pipe reader.
-        this.readThread = new Thread(this::read);
-        this.readThread.start();
+        new Thread(this::read).start();
     }
 
     /**
@@ -160,7 +161,7 @@ public final class Node {
      * @return The search results.
      */
     @SneakyThrows
-    public List<SearchResult> youtubeSearch(String query, boolean music) {
+    public List<Track> youtubeSearch(String query, boolean music) {
         // Send the packet and expect a response.
         var data = this.sendExpect(
                 PacketIds._YouTubeSearchReq,
@@ -225,7 +226,7 @@ public final class Node {
      * @return The search result.
      */
     @SneakyThrows
-    public SearchResult youtubeFetch(String id) {
+    public Track youtubeFetch(String id) {
         // Send the packet and expect a response.
         var data = this.sendExpect(
                 PacketIds._YouTubeFetchReq,
@@ -238,5 +239,38 @@ public final class Node {
         }
 
         return result.getResult();
+    }
+
+    /**
+     * Fetches a YouTube playlist.
+     *
+     * @param url The playlist URL.
+     * @return The playlist.
+     */
+    @SneakyThrows
+    public Playlist youtubePlaylist(String url) {
+        // Send the packet and expect a response.
+        var data = this.sendExpect(
+                PacketIds._YouTubePlaylistReq,
+                YouTubePlaylistReq.newBuilder()
+                        .setPlaylistUrl(url));
+        var result = YouTubePlaylistRsp.parseFrom(data);
+
+        if (!result.getSuccessful()) {
+            throw new RuntimeException("Failed to fetch YouTube playlist.");
+        }
+
+        // Convert the playlist to the native format.
+        var playlist = result.getPlaylist();
+        return new Playlist()
+                .setName(playlist.getName())
+                .setDescription(playlist.getDescription())
+                .setIcon(playlist.getIcon())
+                .setPrivate(playlist.getIsPrivate())
+                .setTracks(new ArrayList<>(
+                        playlist.getTracksList().stream()
+                                .map(TrackData::toTrack)
+                                .toList())
+                );
     }
 }

@@ -3,7 +3,9 @@ package moe.seikimo.laudiolin.utils;
 import com.google.gson.JsonObject;
 import moe.seikimo.laudiolin.Config;
 import moe.seikimo.laudiolin.Laudiolin;
+import moe.seikimo.laudiolin.models.data.Playlist;
 import moe.seikimo.laudiolin.models.data.TrackData;
+import org.jetbrains.annotations.NotNull;
 import se.michaelthelin.spotify.SpotifyApi;
 import se.michaelthelin.spotify.model_objects.specification.Track;
 import se.michaelthelin.spotify.requests.authorization.client_credentials.ClientCredentialsRequest;
@@ -131,6 +133,7 @@ public interface SpotifyUtils {
      * @param track The track to convert.
      * @return The converted track.
      */
+    @NotNull
     static TrackData toTrackData(Track track) {
         // Combine the artists together.
         var artists = new StringBuilder();
@@ -175,6 +178,56 @@ public interface SpotifyUtils {
         if (search.isEmpty()) return "";
 
         return search.get(0).getId();
+    }
+
+    /**
+     * Converts a Spotify playlist into a Laudiolin playlist.
+     *
+     * @param url The URL of the playlist.
+     * @return The converted playlist.
+     */
+    static Playlist playlist(String url) {
+        try {
+            // Extract the ID from the URL.
+            var id = url.split("playlist/")[1];
+            // Fetch the Spotify playlist.
+            var playlist = SPOTIFY.getPlaylist(id)
+                    .build().execute();
+            var tracks = playlist.getTracks();
+
+            // Convert the playlist.
+            var converted = new Playlist()
+                    .setName(playlist.getName())
+                    .setDescription(playlist.getDescription())
+                    .setIcon(playlist.getImages()[0].getUrl())
+                    .setPrivate(!playlist.getIsPublicAccess());
+            int offset = 0, limit = tracks.getTotal();
+
+            var items = tracks.getItems();
+            while (true) {
+                for (var item : items) {
+                    if (item.getIsLocal()) continue;
+                    var rawTrack = item.getTrack();
+                    if (!(rawTrack instanceof Track track)) continue;
+
+                    // Parse the track.
+                    var parsed = SpotifyUtils.toTrackData(track);
+                    converted.getTracks().add(parsed);
+                }
+
+                // Check if there are more tracks.
+                if (offset < limit) {
+                    offset += items.length;
+                    items = SPOTIFY.getPlaylistsItems(id)
+                            .offset(offset).build().execute()
+                            .getItems();
+                } else break;
+            }
+
+            return converted;
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 
     final class AuthorizeTask extends TimerTask {

@@ -1,9 +1,10 @@
-import { SearchResult, YouTubeSearchReq, YouTubeSearchRsp } from "@app/Messages";
+import { Track, YouTubeSearchReq, YouTubeSearchRsp } from "@app/Messages";
 import { sendPacket } from "@app/java";
 
 import { Socket } from "net";
 
 import { youtube, ytMusic } from "@app/index";
+import { parseVideo } from "@app/utils";
 
 import { YTNodes, YTMusic } from "youtubei.js";
 import { ObservedArray } from "youtubei.js/dist/src/parser/helpers";
@@ -14,7 +15,7 @@ import { ObservedArray } from "youtubei.js/dist/src/parser/helpers";
  *
  * @param query The query to search for.
  */
-async function searchMusic(query: string): Promise<SearchResult[]> {
+async function searchMusic(query: string): Promise<Track[]> {
     const search = await ytMusic.search(query);
     return await parseTracks(search);
 }
@@ -24,7 +25,7 @@ async function searchMusic(query: string): Promise<SearchResult[]> {
  * @param search The search to parse.
  * @return Parsed search results.
  */
-async function parseTracks(search: YTMusic.Search): Promise<SearchResult[]> {
+async function parseTracks(search: YTMusic.Search): Promise<Track[]> {
     // Extract different search results.
     // These are sorted from high -> low priority.
     let songs, albums, videos;
@@ -33,9 +34,9 @@ async function parseTracks(search: YTMusic.Search): Promise<SearchResult[]> {
     try { videos = await search.getMore(search.videos); } catch { }
 
     // Parse each search result into a collection of tracks.
-    let songTracks: SearchResult[] = [],
-        albumTracks: SearchResult[] = [],
-        videoTracks: SearchResult[] = [];
+    let songTracks: Track[] = [],
+        albumTracks: Track[] = [],
+        videoTracks: Track[] = [];
     if (songs && songs.contents) songTracks = await parseShelf(songs.contents);
     if (albums && albums.contents) albumTracks = await parseShelf(albums.contents);
     if (videos && videos.contents) videoTracks = await parseShelf(videos.contents);
@@ -48,7 +49,7 @@ async function parseTracks(search: YTMusic.Search): Promise<SearchResult[]> {
  * Returns search results from within an album.
  * @param album The album to search within.
  */
-async function parseAlbum(album: YTNodes.MusicResponsiveListItem): Promise<SearchResult[]> {
+async function parseAlbum(album: YTNodes.MusicResponsiveListItem): Promise<Track[]> {
     // Check the item type.
     if (album.item_type != "album") return [];
 
@@ -64,7 +65,7 @@ async function parseAlbum(album: YTNodes.MusicResponsiveListItem): Promise<Searc
     const icon = album.thumbnails[0].url;
     const artist = album.author ? album.author.name : "Unknown";
 
-    const results: SearchResult[] = [];
+    const results: Track[] = [];
     for (const track of tracks) {
         const result = parseItem(track, icon, artist);
         if (result) results.push(result);
@@ -77,10 +78,10 @@ async function parseAlbum(album: YTNodes.MusicResponsiveListItem): Promise<Searc
  * Parses a music shelf object into search results.
  * @param shelf The shelf to parse. (should be a "getMore" result)
  */
-async function parseShelf(shelf: ObservedArray<YTNodes.MusicShelf | YTNodes.MusicCardShelf | YTNodes.ItemSection>): Promise<SearchResult[]> {
+async function parseShelf(shelf: ObservedArray<YTNodes.MusicShelf | YTNodes.MusicCardShelf | YTNodes.ItemSection>): Promise<Track[]> {
     if (!shelf) return [];
 
-    const results: SearchResult[] = [];
+    const results: Track[] = [];
     for (const node of shelf) {
         if (!(node instanceof YTNodes.MusicShelf)) continue;
 
@@ -112,7 +113,7 @@ function parseItem(
     item: YTNodes.MusicResponsiveListItem,
     icon: string | null = null,
     artist: string | null = null
-): SearchResult | undefined {
+): Track | undefined {
     if (!item.id) return undefined;
 
     let artists: string[] = [];
@@ -143,12 +144,12 @@ function parseItem(
  *
  * @param query The query to search for.
  */
-async function searchRegular(query: string): Promise<SearchResult[]> {
+async function searchRegular(query: string): Promise<Track[]> {
     const search = await youtube.search(query);
     const tracks = search.videos;
 
     // Parse the search results.
-    const results: SearchResult[] = [];
+    const results: Track[] = [];
     for (const track of tracks) {
         if (track != null && track instanceof YTNodes.Video)
             results.push(parseVideo(track));
@@ -161,28 +162,12 @@ async function searchRegular(query: string): Promise<SearchResult[]> {
     }
 }
 
-/**
- * Converts a YouTube video to a search result.
- *
- * @param video The video to convert.
- */
-function parseVideo(video: YTNodes.Video): SearchResult {
-    return {
-        title: video.title.text ?? "",
-        artists: [video.author.name],
-        icon: video.thumbnails[0].url ?? "",
-        url: "https://youtu.be/" + (video.id ?? ""),
-        id: video.id,
-        duration: video.duration.seconds
-    };
-}
-
 export default async function(socket: Socket, retcode: number, req: Buffer){
     const { query, youtubeMusic } = YouTubeSearchReq.fromBinary(req);
 
     try {
         // Perform the search.
-        let results: SearchResult[];
+        let results: Track[];
         if (youtubeMusic) {
             results = await searchMusic(query);
         } else {

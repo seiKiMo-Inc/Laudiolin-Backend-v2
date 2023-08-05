@@ -12,15 +12,25 @@ enum PacketIds {
   _YouTubeStreamRsp = 6;
   _YouTubeFetchReq = 7;
   _YouTubeFetchRsp = 8;
+  _YouTubePlaylistReq = 9;
+  _YouTubePlaylistRsp = 10;
 }
 
-message SearchResult {
+message Track {
   string id = 1;
   string title = 2;
   repeated string artists = 3;
   string icon = 4;
   string url = 5;
   uint32 duration = 6;
+}
+
+message Playlist {
+  string name = 1;
+  string description = 2;
+  string icon = 3;
+  bool is_private = 4;
+  repeated Track tracks = 5;
 }
 
 /* Messages */
@@ -32,7 +42,7 @@ message YouTubeSearchReq {
 
 message YouTubeSearchRsp {
   bool successful = 1;
-  repeated SearchResult results = 2;
+  repeated Track results = 2;
 }
 
 message YouTubeDownloadReq {
@@ -61,5 +71,14 @@ message YouTubeFetchReq {
 
 message YouTubeFetchRsp {
   bool successful = 1;
-  SearchResult result = 2;
+  Track result = 2;
+}
+
+message YouTubePlaylistReq {
+  string playlist_url = 1;
+}
+
+message YouTubePlaylistRsp {
+  bool successful = 1;
+  Playlist playlist = 2;
 }

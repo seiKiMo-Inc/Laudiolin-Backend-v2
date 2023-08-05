@@ -1,4 +1,4 @@
-import { SearchResult, YouTubeFetchReq, YouTubeFetchRsp } from "@app/Messages";
+import { Track, YouTubeFetchReq, YouTubeFetchRsp } from "@app/Messages";
 import { sendPacket } from "@app/java";
 
 import { Socket } from "net";
@@ -17,7 +17,7 @@ export default async function(socket: Socket, retcode: number, req: Buffer) {
         if (!basicInfo.id || !basicInfo.duration)
             throw new Error("Invalid video result.");
 
-        const result: SearchResult = {
+        const result: Track = {
             title: basicInfo.title ?? "",
             artists: [basicInfo.author ?? ""],
             icon: basicInfo.thumbnail?.[0].url ?? "",

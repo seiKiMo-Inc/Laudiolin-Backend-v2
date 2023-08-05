@@ -7,6 +7,7 @@ import dev.morphia.annotations.Reference;
 import lombok.Data;
 import moe.seikimo.laudiolin.interfaces.DatabaseObject;
 import moe.seikimo.laudiolin.objects.JObject;
+import moe.seikimo.laudiolin.utils.DatabaseUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,17 @@ import java.util.List;
 @Data
 @Entity(value = "users", useDiscriminator = false)
 public class User implements DatabaseObject<User> {
+    /**
+     * Fetches a user by their ID.
+     *
+     * @param id The ID of the user.
+     * @return The user.
+     */
+    public static User getUserById(String id) {
+        return DatabaseUtils.fetch(
+                User.class, "_id", id);
+    }
+
     @Id private String userId;
 
     @Reference(idOnly = true, ignoreMissing = true, lazy = true)
@@ -22,6 +34,10 @@ public class User implements DatabaseObject<User> {
     private List<TrackData> recentlyPlayed = new ArrayList<>();
 
     private String presenceToken;
+
+    public User() {
+        // Empty constructor for Morphia.
+    }
 
     @Override
     public JsonObject explain() {
