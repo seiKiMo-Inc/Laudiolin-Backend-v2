@@ -217,7 +217,7 @@ public final class Laudiolin {
 
                     while ((length = nodeOutput.read(buffer)) != -1) {
                         // Print the Node output.
-                        System.out.print(new String(
+                        Laudiolin.getConsole().printAbove(new String(
                                 Arrays.copyOfRange(buffer, 0, length)));
                     }
                 } catch (IOException exception) {
