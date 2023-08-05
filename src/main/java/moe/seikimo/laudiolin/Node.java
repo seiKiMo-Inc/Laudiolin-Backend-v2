@@ -110,18 +110,6 @@ public final class Node {
     }
 
     /**
-     * Attempts to shut down the pipe.
-     */
-    public void shutdown() {
-        try {
-            this.readThread.interrupt();
-            this.pipe.close();
-        } catch (IOException exception) {
-            this.logger.warn("Failed to close pipe.", exception);
-        }
-    }
-
-    /**
      * Sends a packet to Node.js and expects a response.
      * The response data will be passed to the future for parsing.
      *
@@ -228,5 +216,27 @@ public final class Node {
                         .setStart(start)
                         .setEnd(end));
         return YouTubeStreamRsp.parseFrom(data);
+    }
+
+    /**
+     * Performs a YouTube search for a video ID.
+     *
+     * @param id The video ID.
+     * @return The search result.
+     */
+    @SneakyThrows
+    public SearchResult youtubeFetch(String id) {
+        // Send the packet and expect a response.
+        var data = this.sendExpect(
+                PacketIds._YouTubeFetchReq,
+                YouTubeFetchReq.newBuilder()
+                        .setVideoId(id));
+        var result = YouTubeFetchRsp.parseFrom(data);
+
+        if (!result.getSuccessful()) {
+            throw new RuntimeException("Failed to fetch YouTube video.");
+        }
+
+        return result.getResult();
     }
 }

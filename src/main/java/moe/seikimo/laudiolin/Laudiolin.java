@@ -11,9 +11,7 @@ import io.javalin.json.JavalinGson;
 import io.javalin.plugin.bundled.CorsPluginConfig;
 import lombok.Getter;
 import moe.seikimo.laudiolin.objects.Constants;
-import moe.seikimo.laudiolin.routers.ProxyRouter;
-import moe.seikimo.laudiolin.routers.SiteRouter;
-import moe.seikimo.laudiolin.routers.StreamRouter;
+import moe.seikimo.laudiolin.routers.*;
 import moe.seikimo.laudiolin.utils.EncodingUtils;
 import moe.seikimo.laudiolin.utils.SpotifyUtils;
 import org.jline.reader.EndOfFileException;
@@ -132,8 +130,11 @@ public final class Laudiolin {
                 javalin.exception(Exception.class, SiteRouter::handleException);
 
                 // Configure routers.
+                SiteRouter.configure(javalin);
                 ProxyRouter.configure(javalin);
                 StreamRouter.configure(javalin);
+                SearchRouter.configure(javalin);
+                PlaylistRouter.configure(javalin);
 
                 // Start the Javalin instance.
                 javalin.start(Config.get().getPort());

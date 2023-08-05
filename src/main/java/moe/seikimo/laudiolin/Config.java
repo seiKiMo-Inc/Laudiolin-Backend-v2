@@ -7,6 +7,9 @@ import moe.seikimo.laudiolin.utils.EncodingUtils;
 import java.io.File;
 import java.io.FileReader;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Data
 public final class Config {
@@ -55,13 +58,26 @@ public final class Config {
 
     private int port = 3000;
     private String mongoUri = "mongodb://localhost:27017";
+    private String seiKiMoBaseUrl = "https://seikimo.moe";
     private String storagePath = "files";
 
     public Spotify spotify = new Spotify();
+    public RateLimits rateLimits = new RateLimits();
 
     @Data
-    public static class Spotify {
+    public static final class Spotify {
         private String clientId;
         private String clientSecret;
+    }
+
+    @Data
+    public static final class RateLimits {
+        private int maxRequests = 100;
+        private int withinTime = 1;
+        private TimeUnit withinUnit = TimeUnit.MINUTES;
+        private int timeToReset = 30;
+        private TimeUnit resetUnit = TimeUnit.MINUTES;
+
+        private List<String> exempt = new ArrayList<>();
     }
 }

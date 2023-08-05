@@ -7,6 +7,7 @@ const messages: { [key: number]: any } = {
     [PacketIds._YouTubeSearchReq]: require("@messages/YouTubeSearchReq").default,
     [PacketIds._YouTubeDownloadReq]: require("@messages/YouTubeDownloadReq").default,
     [PacketIds._YouTubeStreamReq]: require("@messages/YouTubeStreamReq").default,
+    [PacketIds._YouTubeFetchReq]: require("@messages/YouTubeFetchReq").default,
 };
 
 

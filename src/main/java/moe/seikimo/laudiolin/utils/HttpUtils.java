@@ -1,6 +1,7 @@
 package moe.seikimo.laudiolin.utils;
 
 import com.google.gson.JsonObject;
+import io.javalin.http.Context;
 import moe.seikimo.laudiolin.objects.JObject;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -78,6 +79,41 @@ public interface HttpUtils {
     }
 
     /**
+     * Attempts to pull authorization.
+     *
+     * @param ctx The context to pull from.
+     * @return The authorization token.
+     */
+    static String getToken(Context ctx) {
+        var token = ctx.header("authorization");
+        if (token == null) return null;
+
+        // TODO: Check token length here.
+        return token.isEmpty() ? null : token;
+    }
+
+    /**
+     * Fetches the IP of a request.
+     *
+     * @param ctx The context.
+     * @return The IP.
+     */
+    static String ip(Context ctx) {
+        // Check headers.
+        var address = ctx.header("CF-Connecting-IP");
+        if (address != null) return address;
+
+        address = ctx.header("X-Forwarded-For");
+        if (address != null) return address;
+
+        address = ctx.header("X-Real-IP");
+        if (address != null) return address;
+
+        // Return the request IP.
+        return ctx.ip();
+    }
+
+    /**
      * @return A 200 success.
      */
     static JsonObject SUCCESS() {
@@ -140,6 +176,17 @@ public interface HttpUtils {
                 .add("timestamp", System.currentTimeMillis())
                 .add("code", 500)
                 .add("message", "Internal server error.")
+                .gson();
+    }
+
+    /**
+     * @return A 429 error.
+     */
+    static JsonObject RATE_LIMITED() {
+        return JObject.c()
+                .add("timestamp", System.currentTimeMillis())
+                .add("code", 429)
+                .add("message", "You are being rate limited.")
                 .gson();
     }
 }

@@ -1,4 +1,4 @@
-import { PacketIds, SearchResult, YouTubeSearchReq, YouTubeSearchRsp } from "@app/Messages";
+import { SearchResult, YouTubeSearchReq, YouTubeSearchRsp } from "@app/Messages";
 import { sendPacket } from "@app/java";
 
 import { Socket } from "net";
@@ -27,21 +27,21 @@ async function searchMusic(query: string): Promise<SearchResult[]> {
 async function parseTracks(search: YTMusic.Search): Promise<SearchResult[]> {
     // Extract different search results.
     // These are sorted from high -> low priority.
-    let albums, songs, videos;
-    try { albums = await search.getMore(search.albums); } catch { }
+    let songs, albums, videos;
     try { songs = await search.getMore(search.songs); } catch { }
+    try { albums = await search.getMore(search.albums); } catch { }
     try { videos = await search.getMore(search.videos); } catch { }
 
     // Parse each search result into a collection of tracks.
-    let albumTracks: SearchResult[] = [],
-        songTracks: SearchResult[] = [],
+    let songTracks: SearchResult[] = [],
+        albumTracks: SearchResult[] = [],
         videoTracks: SearchResult[] = [];
-    if (albums && albums.contents) albumTracks = await parseShelf(albums.contents);
     if (songs && songs.contents) songTracks = await parseShelf(songs.contents);
+    if (albums && albums.contents) albumTracks = await parseShelf(albums.contents);
     if (videos && videos.contents) videoTracks = await parseShelf(videos.contents);
 
     // Merge all tracks into a single collection.
-    return [...albumTracks, ...songTracks, ...videoTracks];
+    return [...songTracks, ...albumTracks, ...videoTracks];
 }
 
 /**

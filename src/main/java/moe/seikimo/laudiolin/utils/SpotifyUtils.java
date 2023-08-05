@@ -105,8 +105,7 @@ public interface SpotifyUtils {
             }
 
             return response.getItems()[0];
-        } catch (Exception exception) {
-            Laudiolin.getLogger().warn("Failed to search ISRC " + isrc + ".", exception);
+        } catch (Exception ignored) {
             return null;
         }
     }
@@ -148,6 +147,7 @@ public interface SpotifyUtils {
                 .icon(track.getAlbum().getImages()[0].getUrl())
                 .id(track.getExternalIds().getExternalIds().get("isrc"))
                 .duration((int) Math.floor(track.getDurationMs() / 1000f))
+                .url(track.getExternalUrls().get("spotify"))
                 .build();
     }
 
