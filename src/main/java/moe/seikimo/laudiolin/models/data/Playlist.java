@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 import moe.seikimo.laudiolin.interfaces.DatabaseObject;
 import moe.seikimo.laudiolin.objects.JObject;
+import moe.seikimo.laudiolin.utils.DatabaseUtils;
 import moe.seikimo.laudiolin.utils.EncodingUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,6 +18,17 @@ import java.util.List;
 @Accessors(chain = true)
 @Entity(value = "playlists", useDiscriminator = false)
 public class Playlist implements DatabaseObject<Playlist> {
+    /**
+     * Gets a playlist by its ID.
+     *
+     * @param id The ID of the playlist.
+     * @return The playlist.
+     */
+    public static Playlist getPlaylistById(String id) {
+        return DatabaseUtils.fetch(
+                Playlist.class, "_id", id);
+    }
+
     /**
      * Checks if a playlist is valid.
      *

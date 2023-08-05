@@ -6,14 +6,17 @@ import io.javalin.http.Context;
 import moe.seikimo.laudiolin.Laudiolin;
 import moe.seikimo.laudiolin.enums.Source;
 import moe.seikimo.laudiolin.models.data.Playlist;
+import moe.seikimo.laudiolin.models.data.TrackData;
 import moe.seikimo.laudiolin.models.data.User;
 import moe.seikimo.laudiolin.utils.AccountUtils;
 import moe.seikimo.laudiolin.utils.DatabaseUtils;
+import moe.seikimo.laudiolin.utils.EncodingUtils;
 import moe.seikimo.laudiolin.utils.SpotifyUtils;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
-import static moe.seikimo.laudiolin.utils.HttpUtils.INVALID_ARGUMENTS;
+import static moe.seikimo.laudiolin.utils.HttpUtils.*;
 
 public interface PlaylistRouter {
     /**
@@ -24,9 +27,9 @@ public interface PlaylistRouter {
     static void configure(Javalin javalin) {
         javalin.post("/playlist/create", PlaylistRouter::createPlaylist);
         javalin.patch("/playlist/import", PlaylistRouter::importPlaylist);
-        // javalin.get("/playlist/{id}", PlaylistRouter::fetchPlaylist);
-        // javalin.patch("/playlist/{id}", PlaylistRouter::updatePlaylist);
-        // javalin.delete("/playlist/{id}", PlaylistRouter::deletePlaylist);
+        javalin.get("/playlist/{id}", PlaylistRouter::fetchPlaylist);
+        javalin.patch("/playlist/{id}", PlaylistRouter::updatePlaylist);
+        javalin.delete("/playlist/{id}", PlaylistRouter::deletePlaylist);
     }
 
     /**
@@ -101,6 +104,253 @@ public interface PlaylistRouter {
             }
 
             PlaylistRouter.addPlaylist(ctx, user, playlist);
+        } catch (Exception ignored) {
+            ctx.status(400).json(INVALID_ARGUMENTS());
+        }
+    }
+
+    /**
+     * Fetches the playlist data.
+     *
+     * @param ctx The Javalin context.
+     */
+    static void fetchPlaylist(Context ctx) {
+        try {
+            // Pull arguments.
+            var id = ctx.pathParam("id");
+
+            // Validate arguments.
+            if (id.isEmpty()) {
+                ctx.status(400).json(INVALID_ARGUMENTS());
+                return;
+            }
+
+            // Fetch the playlist from the database.
+            var playlist = Playlist.getPlaylistById(id);
+            if (playlist == null) {
+                ctx.status(404).json(NO_RESULTS());
+                return;
+            }
+
+            // Check if the user can view the playlist.
+            if (playlist.isPrivate()) {
+                // Check for authorization.
+                var user = AccountUtils.getUser(ctx);
+                if (user == null) return;
+
+                // Check if the user is the owner.
+                if (!Objects.equals(user.getUserId(), playlist.getOwner())) {
+                    ctx.status(404).json(NO_RESULTS());
+                    return;
+                }
+            }
+
+            // Return the playlist.
+            ctx.status(301).json(playlist);
+        } catch (Exception ignored) {
+            ctx.status(400).json(INVALID_ARGUMENTS());
+        }
+    }
+
+    /**
+     * Updates a playlist.
+     *
+     * @param ctx The Javalin context.
+     */
+    static void updatePlaylist(Context ctx) {
+        try {
+            // Get the user info.
+            var user = AccountUtils.getUser(ctx);
+            if (user == null) return;
+
+            // Pull parameters.
+            var id = ctx.pathParam("id");
+            var type = ctx.queryParam("type");
+
+            // Validate parameters.
+            if (id.isEmpty() || type == null || type.isEmpty()) {
+                ctx.status(400).json(INVALID_ARGUMENTS());
+                return;
+            }
+
+            // Get the playlist from the database.
+            var playlist = Playlist.getPlaylistById(id);
+            if (playlist == null) {
+                ctx.status(404).json(NO_RESULTS());
+                return;
+            }
+
+            // Check if the user is the owner.
+            if (!Objects.equals(user.getUserId(), playlist.getOwner())) {
+                ctx.status(403).json(NO_AUTHORIZATION());
+                return;
+            }
+
+            // Get the body data.
+            var body = ctx.bodyAsClass(JsonObject.class);
+            switch (type) {
+                default -> {
+                    ctx.status(400).json(INVALID_ARGUMENTS());
+                    return;
+                }
+                case "rename" -> {
+                    // Validate the body.
+                    var nameRaw = body.get("name");
+                    if (nameRaw == null || nameRaw.isJsonNull()) {
+                        ctx.status(400).json(INVALID_ARGUMENTS());
+                        return;
+                    }
+
+                    // Update the playlist.
+                    playlist.setName(nameRaw.getAsString());
+                }
+                case "describe" -> {
+                    // Validate the body.
+                    var descriptionRaw = body.get("description");
+                    if (descriptionRaw == null || descriptionRaw.isJsonNull()) {
+                        ctx.status(400).json(INVALID_ARGUMENTS());
+                        return;
+                    }
+
+                    // Update the playlist.
+                    playlist.setDescription(descriptionRaw.getAsString());
+                }
+                case "icon" -> {
+                    // Validate the body.
+                    var iconRaw = body.get("icon");
+                    if (iconRaw == null || iconRaw.isJsonNull()) {
+                        ctx.status(400).json(INVALID_ARGUMENTS());
+                        return;
+                    }
+
+                    // Update the playlist.
+                    playlist.setIcon(iconRaw.getAsString());
+                }
+                case "privacy" -> {
+                    // Validate the body.
+                    var privacyRaw = body.get("privacy");
+                    if (privacyRaw == null || privacyRaw.isJsonNull()) {
+                        ctx.status(400).json(INVALID_ARGUMENTS());
+                        return;
+                    }
+
+                    // Update the playlist.
+                    playlist.setPrivate(privacyRaw.getAsBoolean());
+                }
+                case "add" -> {
+                    // Parse the body into a TrackData object.
+                    var trackData = ctx.bodyAsClass(TrackData.class);
+                    if (trackData == null) {
+                        ctx.status(400).json(INVALID_ARGUMENTS());
+                        return;
+                    }
+                    if (!TrackData.valid(trackData)) {
+                        ctx.status(400).json(INVALID_ARGUMENTS());
+                        return;
+                    }
+
+                    // Add the song to the playlist.
+                    playlist.getTracks().add(trackData);
+                }
+                case "remove" -> {
+                    // Validate the body.
+                    var indexRaw = body.get("index");
+                    if (indexRaw == null || indexRaw.isJsonNull()) {
+                        ctx.status(400).json(INVALID_ARGUMENTS());
+                        return;
+                    }
+
+                    // Remove the song from the playlist.
+                    playlist.getTracks().remove(indexRaw.getAsInt());
+                }
+                case "bulk" -> {
+                    // Validate all the tracks.
+                    var tracks = new ArrayList<TrackData>();
+                    var tracksRaw = body.get("tracks");
+                    if (tracksRaw == null || !tracksRaw.isJsonArray()) {
+                        ctx.status(400).json(INVALID_ARGUMENTS());
+                        return;
+                    }
+
+                    for (var track : tracksRaw.getAsJsonArray()) {
+                        // Transmute the track into TrackData.
+                        var track1 = track.getAsJsonObject();
+                        var trackData = EncodingUtils.jsonDecode(
+                                EncodingUtils.jsonEncode(
+                                        EncodingUtils.toJson(track1)),
+                                TrackData.class
+                        );
+                        if (!TrackData.valid(trackData)) {
+                            ctx.status(400).json(INVALID_ARGUMENTS());
+                            return;
+                        }
+                        tracks.add(trackData);
+                    }
+
+                    // Change the playlist data.
+                    playlist.setTracks(tracks);
+                    playlist.setPrivate(body.get("private") == null ?
+                            playlist.isPrivate() : body.get("private").getAsBoolean());
+                    playlist.setName(body.get("name") == null ?
+                            playlist.getName() : body.get("name").getAsString());
+                    playlist.setDescription(body.get("description") == null ?
+                            playlist.getDescription() : body.get("description").getAsString());
+                    playlist.setIcon(body.get("icon") == null ?
+                            playlist.getIcon() : body.get("icon").getAsString());
+                }
+            }
+
+            // Validate the playlist data.
+            if (!Playlist.valid(playlist)) {
+                ctx.status(400).json(INVALID_ARGUMENTS());
+                return;
+            }
+
+            // Save the playlist.
+            playlist.save();
+            // Return the playlist.
+            ctx.status(200).json(playlist);
+        } catch (Exception ignored) {
+            ctx.status(400).json(INVALID_ARGUMENTS());
+        }
+    }
+
+    static void deletePlaylist(Context ctx) {
+        try {
+            // Get the user.
+            var user = AccountUtils.getUser(ctx);
+            if (user == null) return;
+
+            // Pull parameters.
+            var id = ctx.pathParam("id");
+
+            // Validate parameters.
+            if (id.isEmpty()) {
+                ctx.status(400).json(INVALID_ARGUMENTS());
+                return;
+            }
+
+            // Get the playlist from the database.
+            var playlist = Playlist.getPlaylistById(id);
+            if (playlist == null) {
+                ctx.status(404).json(NO_RESULTS());
+                return;
+            }
+
+            // Check if the user is the owner.
+            if (!Objects.equals(user.getUserId(), playlist.getOwner())) {
+                ctx.status(403).json(NO_AUTHORIZATION());
+                return;
+            }
+
+            // Delete the playlist.
+            playlist.delete();
+            // Remove the playlist from the user.
+            user.getPlaylists().remove(playlist);
+            user.save();
+
+            // Return the playlist.
+            ctx.status(200).json(SUCCESS());
         } catch (Exception ignored) {
             ctx.status(400).json(INVALID_ARGUMENTS());
         }
