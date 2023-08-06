@@ -119,7 +119,7 @@ public final class Laudiolin {
                         .build();
 
                 var datastore = Laudiolin.datastore =
-                        Morphia.createDatastore(mongoClient, "seiKiMo", options);
+                        Morphia.createDatastore(mongoClient, "laudiolin", options);
                 // Configure the mapper.
                 datastore.getMapper().map(Constants.MODELS);
                 // Ensure indexes.
