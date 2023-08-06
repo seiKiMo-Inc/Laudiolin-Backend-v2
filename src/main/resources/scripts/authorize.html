@@ -1,0 +1,12 @@
+<script>
+    const token = "[[TOKEN]]";
+    // Check to see if the window has an opener.
+    if (window.opener) {
+        window.opener.postMessage({ token }, "*");
+    } else {
+        // Send the token to the Laudiolin desktop app.
+        window.location = `laudiolin://login?token=${token}`;
+    }
+    // Redirect to the Laudiolin web app.
+    window.location = "https://laudiolin.seikimo.moe";
+</script>

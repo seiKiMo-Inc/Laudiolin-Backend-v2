@@ -51,6 +51,23 @@ public class User implements DatabaseObject<User> {
                 .getBaseUrl() + "/account/" + this.getUserId()), BasicUserInfo.class);
     }
 
+    /**
+     * @param withPrivate Whether to include private data.
+     * @return The user's information. Including data from here, and the public information.
+     */
+    public JsonObject userInfo(boolean withPrivate) {
+        var publicInfo = this.publicInfo();
+
+        return JObject.c()
+                .addAll(this.explain(withPrivate))
+                .addAll(publicInfo.explain())
+                // Add fallback fields.
+                .add("username", publicInfo.getDisplayName())
+                .add("userId", publicInfo.getUserId())
+                .add("avatar", publicInfo.getIcon())
+                .gson();
+    }
+
     @Override
     public JsonObject explain() {
         return this.explain(false);

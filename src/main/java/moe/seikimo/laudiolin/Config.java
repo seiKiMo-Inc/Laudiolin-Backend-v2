@@ -45,7 +45,7 @@ public final class Config {
     }
 
     /**
-     * Saves the plugin configuration.
+     * Saves the configuration.
      */
     @SneakyThrows
     public static void save() {
@@ -57,6 +57,7 @@ public final class Config {
     }
 
     private int port = 3000;
+    private String appTarget = "https://app.seikimo.moe";
     private String webTarget = "https://laudiolin.seikimo.moe";
     private String mongoUri = "mongodb://localhost:27017";
     private String storagePath = "files";
@@ -93,5 +94,6 @@ public final class Config {
         private TimeUnit resetUnit = TimeUnit.MINUTES;
 
         private List<String> exempt = new ArrayList<>();
+        private List<String> whitelist = new ArrayList<>();
     }
 }

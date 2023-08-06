@@ -7,7 +7,6 @@ import com.google.gson.stream.JsonWriter;
 import moe.seikimo.laudiolin.utils.EncodingUtils;
 
 import java.io.IOException;
-import java.util.List;
 
 /* Replica of JsonObject. Includes chaining. */
 public final class JObject {

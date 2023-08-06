@@ -37,8 +37,8 @@ public interface EncodingUtils {
      * @param json The JSON to decode.
      * @return The decoded object.
      */
-    static JsonObject jsonDecode(String json) {
-        return GSON.fromJson(json, JsonObject.class);
+    static JsonObject jsonDecode(byte[] json) {
+        return GSON.fromJson(new String(json), JsonObject.class);
     }
 
     /**
@@ -113,6 +113,16 @@ public interface EncodingUtils {
      */
     static String base64Encode(byte[] bytes) {
         return Base64.getEncoder().encodeToString(bytes);
+    }
+
+    /**
+     * Decodes Base64 to bytes.
+     *
+     * @param string The string to decode.
+     * @return The decoded bytes.
+     */
+    static byte[] base64Decode(String string) {
+        return Base64.getDecoder().decode(string);
     }
 
     /**

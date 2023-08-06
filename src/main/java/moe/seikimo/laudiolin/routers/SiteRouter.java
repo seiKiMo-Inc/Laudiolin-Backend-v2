@@ -70,6 +70,9 @@ public interface SiteRouter {
         var limits = Config.get().rateLimits;
         if (limits.getExempt().contains(ip)) return;
 
+        // Check if the route is whitelisted.
+        if (limits.getWhitelist().contains(ctx.path())) return;
+
         // Check if the user is already rate limited.
         if (RATE_LIMITED.contains(ip)) {
             ctx.status(429).json(RATE_LIMITED());
