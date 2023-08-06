@@ -3,10 +3,7 @@ package moe.seikimo.laudiolin.utils;
 import com.google.gson.JsonObject;
 import io.javalin.http.Context;
 import moe.seikimo.laudiolin.objects.JObject;
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import okhttp3.*;
 
 import java.io.IOException;
 
@@ -20,6 +17,8 @@ public interface HttpUtils {
             .followRedirects(true)
             .followSslRedirects(true)
             .build();
+    MediaType JSON_MEDIA_TYPE = MediaType.parse(
+            "application/json; charset=utf-8");
 
     /**
      * Intercepts an HTTP request made by the HTTP client.
@@ -34,6 +33,20 @@ public interface HttpUtils {
         builder.addHeader("User-Agent", "https://github.com/seiKiMo-Inc");
 
         return chain.proceed(builder.build());
+    }
+
+    /**
+     * Makes an HTTP request.
+     *
+     * @param request The request to make.
+     * @return The response.
+     */
+    static Response makeRequest(Request request) {
+        try {
+            return CLIENT.newCall(request).execute();
+        } catch (IOException ignored) {
+            return null;
+        }
     }
 
     /**

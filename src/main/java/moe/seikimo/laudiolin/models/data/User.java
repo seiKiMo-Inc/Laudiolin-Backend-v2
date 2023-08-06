@@ -5,9 +5,13 @@ import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
 import dev.morphia.annotations.Reference;
 import lombok.Data;
+import moe.seikimo.laudiolin.Config;
 import moe.seikimo.laudiolin.interfaces.DatabaseObject;
+import moe.seikimo.laudiolin.models.BasicUserInfo;
 import moe.seikimo.laudiolin.objects.JObject;
 import moe.seikimo.laudiolin.utils.DatabaseUtils;
+import moe.seikimo.laudiolin.utils.EncodingUtils;
+import moe.seikimo.laudiolin.utils.HttpUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +41,14 @@ public class User implements DatabaseObject<User> {
 
     public User() {
         // Empty constructor for Morphia.
+    }
+
+    /**
+     * @return The public information about the user.
+     */
+    public BasicUserInfo publicInfo() {
+        return EncodingUtils.jsonDecode(HttpUtils.makeRequest(Config.get().seikimo
+                .getBaseUrl() + "/account/" + this.getUserId()), BasicUserInfo.class);
     }
 
     @Override

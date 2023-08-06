@@ -57,12 +57,26 @@ public final class Config {
     }
 
     private int port = 3000;
+    private String webTarget = "https://laudiolin.seikimo.moe";
     private String mongoUri = "mongodb://localhost:27017";
-    private String seiKiMoBaseUrl = "https://seikimo.moe";
     private String storagePath = "files";
 
+    public SeiKiMo seikimo = new SeiKiMo();
+    public Discord discord = new Discord();
     public Spotify spotify = new Spotify();
     public RateLimits rateLimits = new RateLimits();
+
+    @Data
+    public static final class SeiKiMo {
+        private String baseUrl = "https://seikimo.moe";
+        private String adminToken;
+    }
+
+    @Data
+    public static final class Discord {
+        private String discordClientId = "";
+        private boolean presenceDetails = false;
+    }
 
     @Data
     public static final class Spotify {

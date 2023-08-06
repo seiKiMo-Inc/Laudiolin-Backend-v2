@@ -22,7 +22,7 @@ public interface AccountUtils {
     @Nullable
     static JsonObject accountInfo(String token) {
         var request = new Request.Builder()
-                .url(Config.get().getSeiKiMoBaseUrl() + "/account")
+                .url(Config.get().seikimo.getBaseUrl() + "/account")
                 .header("Authorization", token)
                 .build();
 

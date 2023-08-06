@@ -10,6 +10,7 @@ import io.javalin.config.JavalinConfig;
 import io.javalin.json.JavalinGson;
 import io.javalin.plugin.bundled.CorsPluginConfig;
 import lombok.Getter;
+import moe.seikimo.laudiolin.gateway.Gateway;
 import moe.seikimo.laudiolin.objects.Constants;
 import moe.seikimo.laudiolin.routers.*;
 import moe.seikimo.laudiolin.utils.EncodingUtils;
@@ -29,6 +30,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 public final class Laudiolin {
     private static final long startTime = System.currentTimeMillis();
@@ -42,6 +45,8 @@ public final class Laudiolin {
             = LoggerFactory.getLogger("Laudiolin Backend");
     @Getter private static final Javalin javalin
             = Javalin.create(Laudiolin::configureJavalin);
+    @Getter private static final ExecutorService threadPool
+            = new ScheduledThreadPoolExecutor(4);
     @Getter private static final Map<String, String> arguments
             = new HashMap<>();
 
@@ -136,6 +141,8 @@ public final class Laudiolin {
                 StreamRouter.configure(javalin);
                 SearchRouter.configure(javalin);
                 PlaylistRouter.configure(javalin);
+
+                Gateway.configure(javalin);
 
                 // Start the Javalin instance.
                 javalin.start(Config.get().getPort());

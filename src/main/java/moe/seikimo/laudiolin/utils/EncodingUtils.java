@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import moe.seikimo.laudiolin.interfaces.DatabaseObject;
+import moe.seikimo.laudiolin.objects.JObject;
 
 import java.io.Reader;
 import java.net.URL;
@@ -14,6 +15,7 @@ import java.util.List;
 
 public interface EncodingUtils {
     Gson GSON = new GsonBuilder()
+            .registerTypeAdapter(JObject.class, new JObject.Adapter())
             .setPrettyPrinting()
             .disableHtmlEscaping()
             .serializeNulls()
@@ -57,8 +59,30 @@ public interface EncodingUtils {
      * @param type The type of the object.
      * @return The decoded object.
      */
+    static <T> T jsonDecode(byte[] json, Class<T> type) {
+        return GSON.fromJson(new String(json), type);
+    }
+
+    /**
+     * Decodes an object from JSON.
+     *
+     * @param json The JSON to decode.
+     * @param type The type of the object.
+     * @return The decoded object.
+     */
     static <T> T jsonDecode(String json, Class<T> type) {
         return GSON.fromJson(json, type);
+    }
+
+    /**
+     * Decodes an object from JSON.
+     *
+     * @param object The JSON to decode.
+     * @param type The type of the object.
+     * @return The decoded object.
+     */
+    static <T> T jsonDecode(JsonElement object, Class<T> type) {
+        return GSON.fromJson(object, type);
     }
 
     /**
