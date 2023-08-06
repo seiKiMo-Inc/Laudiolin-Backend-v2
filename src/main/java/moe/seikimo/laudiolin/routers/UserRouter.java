@@ -49,7 +49,7 @@ public interface UserRouter {
 
             // Redirect to the login page.
             ctx.redirect(baseUrl + "/login?redirect="
-                    + appUrl + "/user&app=Laudiolin&handoff=true");
+                    + appUrl + "/login&app=Laudiolin&handoff=true");
             return;
         }
 
