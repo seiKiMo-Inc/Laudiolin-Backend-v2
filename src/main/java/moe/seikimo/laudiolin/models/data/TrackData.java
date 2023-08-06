@@ -75,7 +75,7 @@ public class TrackData {
     public static JsonObject toResults(TrackData top, List<TrackData> other) {
         return JObject.c()
                 .add("top", top)
-                .add("other", other)
+                .add("results", other)
                 .gson();
     }
 

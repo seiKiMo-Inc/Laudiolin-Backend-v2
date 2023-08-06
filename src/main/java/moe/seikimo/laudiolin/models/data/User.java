@@ -90,7 +90,9 @@ public class User implements DatabaseObject<User> {
                 this.getPlaylists().stream()
                         .filter(playlist -> !playlist.isPrivate())
                         .toList();
-        baseData.add("playlists", playlists);
+        baseData.add("playlists", playlists.stream()
+                .map(Playlist::getId)
+                .toList());
 
         return baseData.gson();
     }
