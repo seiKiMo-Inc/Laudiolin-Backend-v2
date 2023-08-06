@@ -13,7 +13,6 @@ import moe.seikimo.laudiolin.objects.DiscordPresence.*;
 import moe.seikimo.laudiolin.objects.JObject;
 import moe.seikimo.laudiolin.objects.user.PresenceMode;
 import moe.seikimo.laudiolin.objects.user.SocialStatus;
-import moe.seikimo.laudiolin.utils.AccountUtils;
 import moe.seikimo.laudiolin.utils.EncodingUtils;
 import org.eclipse.jetty.websocket.api.Session;
 import org.jetbrains.annotations.NotNull;
@@ -248,8 +247,8 @@ public final class GatewaySession {
         }
 
         // Set the presence.
-        DiscordPresence.apply(this.getUser(),
-                presence.assets(assets.build()).build());
+        presence.assets(assets.build())
+                .build().apply(this.getUser());
     }
 
     /**

@@ -138,6 +138,18 @@ public interface HttpUtils {
     }
 
     /**
+     * @return A 200 success.
+     */
+    static JsonObject SUCCESS(JsonObject data) {
+        return JObject.c()
+                .add("timestamp", System.currentTimeMillis())
+                .add("code", 200)
+                .add("message", "Success.")
+                .addAll(data)
+                .gson();
+    }
+
+    /**
      * @return A 404 error.
      */
     static JsonObject NO_RESULTS() {

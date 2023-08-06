@@ -127,6 +127,19 @@ public final class JObject {
     }
 
     /**
+     * Adds all members from a {@link JsonObject} to this object.
+     *
+     * @param source The source object.
+     * @return This object.
+     */
+    public JObject addAll(JsonObject source) {
+        for (var entry : source.entrySet()) {
+            this.add(entry.getKey(), entry.getValue());
+        }
+        return this;
+    }
+
+    /**
      * @return A {@link JsonObject} representation of this object.
      */
     public JsonObject gson() {

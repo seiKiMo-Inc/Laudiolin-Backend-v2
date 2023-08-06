@@ -1,11 +1,11 @@
 package moe.seikimo.laudiolin.models;
 
 import lombok.Builder;
-import lombok.Setter;
+import lombok.Data;
 import moe.seikimo.laudiolin.models.data.TrackData;
 import moe.seikimo.laudiolin.objects.user.SocialStatus;
 
-@Setter
+@Data
 @Builder
 public final class OfflineUser {
     private String username;

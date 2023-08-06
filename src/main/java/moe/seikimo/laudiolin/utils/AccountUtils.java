@@ -1,10 +1,13 @@
 package moe.seikimo.laudiolin.utils;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import io.javalin.http.Context;
 import moe.seikimo.laudiolin.Config;
 import moe.seikimo.laudiolin.models.data.User;
+import moe.seikimo.laudiolin.objects.JObject;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -39,6 +42,48 @@ public interface AccountUtils {
 
             return EncodingUtils.jsonDecode(
                     body.string(), JsonObject.class);
+        } catch (IOException ignored) {
+            return null;
+        }
+    }
+
+    /**
+     * Fetches an account's friends list by token.
+     * This method uses the seiKiMo admin account API.
+     *
+     * @param token The token.
+     * @return The friends list, or null if not found.
+     */
+    @Nullable
+    static JsonArray friends(String token) {
+        // Prepare the request body.
+        var body = JObject.c()
+                .add("token", token)
+                .toString();
+
+        // Prepare the backend request.
+        var seikimo = Config.get().seikimo;
+        var requestBody = RequestBody.create(
+                body, HttpUtils.JSON_MEDIA_TYPE);
+        var request = new Request.Builder()
+                .url(seikimo.getBaseUrl() + "/account/friends")
+                .method("POST", requestBody)
+                .header("Authorization", seikimo.getAdminToken())
+                .build();
+
+        // Execute the request.
+        try (var response = HttpUtils.makeRequest(request)) {
+            // Check if the response executed.
+            if (response == null) return null;
+            // Check the response code.
+            if (!response.isSuccessful()) return null;
+
+            // Parse the response body.
+            var responseBody = response.body();
+            if (responseBody == null) return null;
+
+            return EncodingUtils.jsonDecode(
+                    responseBody.string(), JsonArray.class);
         } catch (IOException ignored) {
             return null;
         }
