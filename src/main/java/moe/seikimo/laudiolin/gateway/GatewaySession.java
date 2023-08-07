@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static moe.seikimo.laudiolin.gateway.Gateway.GATEWAY_INIT;
 import static moe.seikimo.laudiolin.gateway.Gateway.GATEWAY_PING;
@@ -46,7 +47,7 @@ public final class GatewaySession {
     // The user's social properties.
     private long lastUpdateTime = 0;
 
-    private List<GatewaySession> listeningAlong = null;
+    private List<GatewaySession> listeningAlong = new CopyOnWriteArrayList<>();
     @Nullable private GatewaySession listeningWith = null;
 
     /**
