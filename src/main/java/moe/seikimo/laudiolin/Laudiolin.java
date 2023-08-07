@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOError;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -93,9 +94,13 @@ public final class Laudiolin {
                         NetUtils.findFreePort();
 
                 // Check if a Node instance should start.
-                if (!arguments.containsKey("no-node") &&
-                        !Laudiolin.startNode(networkPort)) {
-                    return;
+                if (!arguments.containsKey("no-node")) {
+                    if (Laudiolin.startNode(networkPort)) try {
+                        // Wait for the Node instance to start.
+                        Thread.sleep(1000);
+                    } catch (InterruptedException exception) {
+                        logger.error("Failed to wait for Node instance to start.");
+                    }
                 }
 
                 // Create a node instance.
@@ -159,7 +164,7 @@ public final class Laudiolin {
             // Log the startup time.
             logger.info("Laudiolin backend started in {}ms.",
                     System.currentTimeMillis() - startTime);
-        } catch (URISyntaxException ignored) {
+        } catch (ConnectException | URISyntaxException ignored) {
             logger.error("Unable to find the Node pipe.");
         } catch (IOException exception) {
             logger.error("Failed to start Laudiolin.", exception);
