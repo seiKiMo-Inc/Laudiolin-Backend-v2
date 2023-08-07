@@ -1,6 +1,7 @@
 package moe.seikimo.laudiolin.routers;
 
 import io.javalin.Javalin;
+import io.javalin.http.ContentType;
 import io.javalin.http.Context;
 import moe.seikimo.laudiolin.utils.HttpUtils;
 
@@ -43,7 +44,7 @@ public interface ProxyRouter {
                 }
                 case "spot" -> HttpUtils.makeRequest("https://i.scdn.co/image/" + url);
                 case "yt" -> HttpUtils.makeRequest("https://i.ytimg.com/vi/" + url + "/hq720.jpg");
-            });
+            }).contentType(ContentType.IMAGE_JPEG);
         } catch (Exception ignored) {
             ctx.status(400).json(INVALID_ARGUMENTS());
         }
