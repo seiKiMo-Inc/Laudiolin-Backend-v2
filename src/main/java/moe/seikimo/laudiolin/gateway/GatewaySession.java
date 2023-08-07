@@ -288,6 +288,9 @@ public final class GatewaySession {
         online.setListeningTo(this.getTrackData());
         online.setProgress(sync == null ?
                 this.getTrackPosition() : sync);
+
+        // Update the online user.
+        Gateway.getOnlineUsers().put(userId, online);
     }
 
     /**
