@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact name="Laudiolin-Backend">
-    <output-path>$PROJECT_DIR$/dist/</output-path>
+    <output-path>$PROJECT_DIR$/dist</output-path>
     <root id="root">
       <element id="archive" name="Laudiolin-Backend.jar">
         <element id="module-output" name="Laudiolin-Backend" />
@@ -42,6 +42,7 @@
       <element id="library" level="project" name="Maven: se.michaelthelin.spotify:spotify-web-api-java:8.0.0" />
       <element id="library" level="project" name="Maven: org.eclipse.jetty:jetty-server:11.0.15" />
       <element id="library" level="project" name="Maven: org.apache.httpcomponents.client5:httpclient5-cache:5.2.1" />
+      <element id="library" level="project" name="Maven: org.java-websocket:Java-WebSocket:1.5.4" />
       <element id="library" level="project" name="Maven: io.github.classgraph:classgraph:4.8.153" />
       <element id="library" level="project" name="Maven: com.github.docker-java:docker-java-transport-zerodep:3.3.0" />
       <element id="library" level="project" name="Maven: org.ow2.asm:asm:9.5" />
