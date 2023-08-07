@@ -171,10 +171,12 @@ public final class GatewaySession {
 
     /**
      * Updates the user's rich presence.
+     *
+     * @param bypass Should we bypass the update time?
      */
-    public void updatePresence() {
+    public void updatePresence(boolean bypass) {
         // Check if the client should update.
-        if (System.currentTimeMillis() -
+        if (!bypass && System.currentTimeMillis() -
                 this.getLastUpdateTime() < 4e3) return;
         // Update the last update time.
         this.setLastUpdateTime(System.currentTimeMillis());
@@ -216,8 +218,8 @@ public final class GatewaySession {
                 .details("Listening to " + track.getTitle())
                 .state(track.getArtist())
                 .timestamps(Timestamps.builder()
-                        .start((int) (started / 1000f))
-                        .end((int) ((started / 1000f) + track.getDuration()))
+                        .start((int) (long) started)
+                        .end((int) (long) (started + (track.getDuration() * 1000f)))
                         .build())
                 .buttons(List.of(
                         Button.builder()
