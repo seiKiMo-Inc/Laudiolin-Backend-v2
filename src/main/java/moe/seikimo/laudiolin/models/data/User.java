@@ -37,8 +37,6 @@ public class User implements DatabaseObject<User> {
     private List<TrackData> likedSongs = new ArrayList<>();
     private List<TrackData> recentlyPlayed = new ArrayList<>();
 
-    private String presenceToken;
-
     public User() {
         // Empty constructor for Morphia.
     }

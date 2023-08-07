@@ -57,11 +57,8 @@ public interface MessageHandler {
         // TODO: Remove user from offline list.
         // TODO: Add user to online list.
 
-        // Check if the user has a presence token.
-        if (user.getPresenceToken() != null) {
-            // Clear the existing presence.
-            DiscordPresence.apply(user, null);
-        }
+        // Clear the existing presence.
+        DiscordPresence.apply(user, null);
 
         // Add the user to the connected users list.
         var users = Gateway.getUsers();
