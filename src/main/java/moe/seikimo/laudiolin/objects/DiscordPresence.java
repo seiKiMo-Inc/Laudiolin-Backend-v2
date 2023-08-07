@@ -42,8 +42,8 @@ public final class DiscordPresence {
 
     @Data @Builder
     public static class Timestamps {
-        private Integer start;
-        private Integer end;
+        private Long start;
+        private Long end;
     }
 
     @Data @Builder

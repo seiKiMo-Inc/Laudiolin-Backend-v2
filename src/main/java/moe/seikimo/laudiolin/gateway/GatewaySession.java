@@ -218,8 +218,8 @@ public final class GatewaySession {
                 .details("Listening to " + track.getTitle())
                 .state(track.getArtist())
                 .timestamps(Timestamps.builder()
-                        .start((int) (long) started)
-                        .end((int) (long) (started + (track.getDuration() * 1000f)))
+                        .start(started)
+                        .end((long) (started + (track.getDuration() * 1000f)))
                         .build())
                 .buttons(List.of(
                         Button.builder()
