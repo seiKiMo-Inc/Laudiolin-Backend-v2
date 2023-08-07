@@ -74,7 +74,14 @@ public interface UserRouter {
                 // Create a new user.
                 user = new User();
                 user.setUserId(userId);
-                user.save();
+
+                // Check if the user has data to migrate.
+                var discordId = accountInfo.get("discord");
+                if (discordId != null && !discordId.isJsonNull()) {
+                    User.migrate(user, discordId.getAsString());
+                } else {
+                    user.save();
+                }
             }
 
             // Redirect the user to the app.
@@ -84,6 +91,7 @@ public interface UserRouter {
                             .replace("[[TOKEN]]", token));
         } catch (Exception ignored) {
             ctx.status(400).json(INVALID_ARGUMENTS());
+            ignored.printStackTrace();
         }
     }
 

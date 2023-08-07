@@ -8,6 +8,7 @@ import lombok.experimental.Accessors;
 import moe.seikimo.laudiolin.Messages;
 import moe.seikimo.laudiolin.objects.JObject;
 import moe.seikimo.laudiolin.utils.EncodingUtils;
+import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -24,6 +25,22 @@ public class TrackData {
 
     public TrackData() {
         // Empty constructor for Morphia.
+    }
+
+    /**
+     * Converts a {@link Document} to a {@link TrackData}.
+     *
+     * @param track The track to convert.
+     * @return The converted track.
+     */
+    public static TrackData toTrack(Document track) {
+        return new TrackData()
+                .setId(track.getString("id"))
+                .setTitle(track.getString("title"))
+                .setArtist(track.getString("artist"))
+                .setIcon(track.getString("icon"))
+                .setUrl(track.getString("url"))
+                .setDuration(track.getInteger("duration"));
     }
 
     /**

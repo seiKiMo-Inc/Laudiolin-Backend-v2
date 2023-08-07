@@ -9,6 +9,7 @@ import moe.seikimo.laudiolin.interfaces.DatabaseObject;
 import moe.seikimo.laudiolin.objects.JObject;
 import moe.seikimo.laudiolin.utils.DatabaseUtils;
 import moe.seikimo.laudiolin.utils.EncodingUtils;
+import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -50,6 +51,37 @@ public class Playlist implements DatabaseObject<Playlist> {
         }
 
         return EncodingUtils.isValidUrl(playlist.getIcon());
+    }
+
+    /**
+     * Migrates an old playlist to a new one.
+     *
+     * @param owner The owner of the playlist.
+     * @param legacy The old playlist.
+     * @return The new playlist.
+     */
+    public static Playlist migrate(User owner, Document legacy) {
+        var playlist = new Playlist();
+
+        // Convert the playlist ID.
+        var oldId = legacy.getObjectId("_id");
+        playlist.setId(oldId.toHexString());
+
+        // Apply basic properties.
+        playlist.setOwner(owner.getUserId());
+        playlist.setName(legacy.getString("name"));
+        playlist.setDescription(legacy.getString("description"));
+        playlist.setIcon(legacy.getString("icon"));
+        playlist.setPrivate(legacy.getBoolean("isPrivate"));
+
+        // Add all playlist tracks.
+        List<TrackData> tracks = new ArrayList<>();
+        for (var track : legacy.getList("tracks", Document.class)) {
+            tracks.add(TrackData.toTrack(track));
+        }
+        playlist.setTracks(tracks);
+
+        return playlist.save();
     }
 
     @Id private String id;
