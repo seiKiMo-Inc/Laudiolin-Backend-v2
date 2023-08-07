@@ -148,9 +148,9 @@ public final class Gateway {
         var exception = ctx.error();
         if (exception == null) return;
 
-        Laudiolin.getLogger().warn("Client {} disconnected with error {}.",
+        Laudiolin.getLogger().debug("Client {} disconnected with error {}.",
                 ctx.getSessionId(), exception.getMessage());
-        Laudiolin.getLogger().warn("Client exception caught!", exception);
+        Laudiolin.getLogger().debug("Client exception caught!", exception);
     }
 
     /**
