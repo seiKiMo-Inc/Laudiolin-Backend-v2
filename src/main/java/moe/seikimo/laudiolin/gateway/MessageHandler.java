@@ -8,6 +8,7 @@ import moe.seikimo.laudiolin.objects.JObject;
 import moe.seikimo.laudiolin.utils.AccountUtils;
 import moe.seikimo.laudiolin.utils.EncodingUtils;
 
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static moe.seikimo.laudiolin.gateway.Gateway.GATEWAY_INVALID_TOKEN;
@@ -130,15 +131,20 @@ public interface MessageHandler {
 
         // Check if the client is listening to a different track.
         var currentTrack = session.getTrackData();
-        if (
-                currentTrack == null
-                || (track != null && !currentTrack.equals(track))
-        ) {
+        if (track != null && !Objects.equals(currentTrack, track)) {
             session.setStartedListening(System.currentTimeMillis());
 
             // Add the track to the user's recently played.
             var user = session.getUser();
-            user.getRecentlyPlayed().add(track);
+            var recents = user.getRecentlyPlayed();
+
+            // Add the track to the user's recently played.
+            if (recents.size() >= 10)
+                recents.remove(9);
+            recents.add(0, track);
+
+            // Apply and save the changes.
+            user.setRecentlyPlayed(recents);
             user.save();
         }
 
