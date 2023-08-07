@@ -152,8 +152,9 @@ public interface StreamRouter {
 
         // Pull the data.
         var buffer = data.getData();
-        var length = data.getContentLength();
-        if (end > length) end = length - 1;
+        var bytes = buffer.toByteArray();
+        var totalLength = data.getContentLength();
+        if (end > totalLength) end = totalLength - 1;
 
         // Prepare the headers.
         if (range == null) {
@@ -167,15 +168,15 @@ public interface StreamRouter {
             ctx
                     .header("Accept-Ranges", "bytes")
                     .header("Content-Type", "audio/mpeg")
-                    .header("Content-Length", String.valueOf(length))
-                    .header("Content-Range", "bytes " + start + "-" + end + "/" + length)
+                    .header("Content-Length", String.valueOf(bytes.length))
+                    .header("Content-Range", "bytes " + start + "-" + end + "/" + totalLength)
                     .header("Connection", "keep-alive")
                     .status(HttpStatus.PARTIAL_CONTENT);
         }
 
         // Send the bytes.
         try (var stream = ctx.outputStream()) {
-            stream.write(buffer.toByteArray());
+            stream.write(bytes);
         } catch (IOException ignored) { }
     }
 
