@@ -6,11 +6,13 @@ import moe.seikimo.laudiolin.Messages.*;
 import moe.seikimo.laudiolin.models.data.Playlist;
 import moe.seikimo.laudiolin.models.data.TrackData;
 import moe.seikimo.laudiolin.utils.RandomUtils;
+import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,68 +24,58 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
-public final class Node {
+public final class Node extends WebSocketClient {
     private final Logger logger
             = LoggerFactory.getLogger("Node IPC");
-
-    private final RandomAccessFile pipe;
 
     private final Map<Integer, Consumer<byte[]>> listeners = new HashMap<>();
 
     /**
-     * Creates a named IPC pipe to Node.js.
+     * Creates a websocket for IPC to Node.js
      *
-     * @param name The name of the pipe.
+     * @param port The port to listen on.
      */
-    public Node(String name) throws IOException {
-        this.pipe = new RandomAccessFile("\\\\?\\pipe\\" + name, "rw");
-
-        // Create the pipe reader.
-        new Thread(this::read).start();
+    public Node(int port) throws URISyntaxException {
+        super(new URI("ws://localhost:" + port));
     }
 
-    /**
-     * Handles reading data from the pipe.
-     */
-    public void read() {
-        final var pipe = this.pipe;
+    @Override
+    public void onOpen(ServerHandshake handshake) {
+        this.logger.info("Connected to Node.");
+    }
 
-        while (true) try {
-            var available = (int) pipe.length();
+    @Override
+    public void onMessage(String message) {
+        this.logger.info("Received message: {}", message);
+    }
 
-            // Check if the process should terminate.
-            if (available == 1) break;
-            if (available < 2) continue;
+    @Override
+    public void onMessage(ByteBuffer buffer) {
+        // Check the packet origin.
+        var origin = buffer.get();
+        if (origin != 0x1) return;
 
-            // Read the data from the pipe.
-            var buffer = ByteBuffer.allocate(available);
-            pipe.read(buffer.array(), 0, available);
+        // Parse the packet.
+        var retcode = buffer.getInt();
+        var packetLength = buffer.getInt();
+        var packetData = new byte[packetLength];
+        buffer.get(packetData, 0, packetLength);
 
-            // Check the packet origin.
-            var origin = buffer.get();
-            if (origin != 0x1) continue;
+        // Handle the packet.
+        var listener = this.listeners.getOrDefault(retcode, null);
+        if (listener != null) listener.accept(packetData);
+    }
 
-            // Parse the packet.
-            var retcode = buffer.getInt();
-            var packetLength = buffer.getInt();
-            var packetData = new byte[packetLength];
-            buffer.get(packetData, 0, packetLength);
+    @Override
+    public void onClose(int code, String reason, boolean remote) {
+        this.logger.warn("Disconnected from Node because {}. (code {})", reason, code);
 
-            // Handle the packet.
-            var listener = this.listeners.getOrDefault(retcode, null);
-            if (listener != null) listener.accept(packetData);
-        } catch (IOException exception) {
-            this.logger.warn("Failed to read from pipe.", exception);
-        }
+        System.exit(code);
+    }
 
-        try {
-            // Close the pipe.
-            pipe.close();
-        } catch (IOException exception) {
-            this.logger.warn("Failed to close pipe.", exception);
-        }
-
-        System.exit(0);
+    @Override
+    public void onError(Exception exception) {
+        this.logger.warn("An error occurred with Node.", exception);
     }
 
     /**
@@ -102,12 +94,8 @@ public final class Node {
         buffer.putInt(data.length); // Write the packet length.
         buffer.put(data, 0, data.length); // Write the packet data.
 
-        try {
-            // Write the packet to the pipe.
-            this.pipe.write(buffer.array());
-        } catch (IOException exception) {
-            this.logger.warn("Failed to write to pipe.", exception);
-        }
+        // Write the packet to the pipe.
+        this.send(buffer.array());
     }
 
     /**

@@ -1,5 +1,5 @@
-import { createServer, Socket } from "net";
-import { join } from "path";
+import { WebSocket, WebSocketServer } from "ws";
+import { createServer } from "http";
 
 import { PacketIds } from "./Messages";
 
@@ -13,18 +13,18 @@ const messages: { [key: number]: any } = {
 
 
 /**
- * Initializes the Java pipe.
+ * Initializes the Java websocket server.
  *
- * @param pipe The pipe to initialize.
+ * @param port The port to host the server on.
  */
-export function initialize(pipe: string): void {
-    const path = join("\\\\?\\pipe", pipe);
+export function initialize(port: number): void {
     const server = createServer();
+    const wss = new WebSocketServer({ server });
 
     // Listen for connections.
-    server.listen(path, () => console.info(
-        `Listening for connections on ${path}.`));
-    server.on("connection", handleConnection);
+    wss.on("connection", handleConnection);
+    server.listen(port, () => console.info(
+        `Listening for connections on ${port}.`));
 }
 
 /**
@@ -32,9 +32,9 @@ export function initialize(pipe: string): void {
  *
  * @param socket The socket that connected.
  */
-function handleConnection(socket: Socket): void {
+function handleConnection(socket: WebSocket): void {
     // Listen for messages.
-    socket.on("data", data => handleMessage(socket, data));
+    socket.on("message", data => handleMessage(socket, data as Buffer));
     socket.on("connect", () => console.info("Connected to Java."));
 }
 
@@ -44,7 +44,7 @@ function handleConnection(socket: Socket): void {
  * @param socket The socket that sent the message.
  * @param data The message data.
  */
-async function handleMessage(socket: Socket, data: Buffer): Promise<void> {
+async function handleMessage(socket: WebSocket, data: Buffer): Promise<void> {
     if (data.length < 2) return; // Ignore empty messages.
     if (data[0] != 0x2) return; // Ignore missed-origin messages.
 
@@ -72,7 +72,7 @@ async function handleMessage(socket: Socket, data: Buffer): Promise<void> {
  * @param retcode The response code to send.
  * @param data The packet data.
  */
-export function sendPacket(socket: Socket, retcode: number, data: Uint8Array): void {
+export function sendPacket(socket: WebSocket, retcode: number, data: Uint8Array): void {
     // Wrap the data as a buffer.
     const dataBuf = Buffer.from(data);
 
@@ -84,5 +84,5 @@ export function sendPacket(socket: Socket, retcode: number, data: Uint8Array): v
     dataBuf.copy(buffer, 9); // Write the packet data.
 
     // Send the packet.
-    socket.write(buffer);
+    socket.send(buffer);
 }

@@ -1,14 +1,14 @@
 import { Playlist, YouTubePlaylistReq, YouTubePlaylistRsp } from "@app/Messages";
 import { sendPacket } from "@app/java";
 
-import { Socket } from "net";
+import { WebSocket } from "ws";
 
 import { youtube } from "@app/index";
 import { parseVideo } from "@app/utils";
 
 import { YTNodes } from "youtubei.js";
 
-export default async function(socket: Socket, retcode: number, req: Buffer) {
+export default async function(socket: WebSocket, retcode: number, req: Buffer) {
     try {
         const { playlistUrl } = YouTubePlaylistReq.fromBinary(req);
 

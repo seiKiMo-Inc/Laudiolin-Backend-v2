@@ -17,7 +17,7 @@ console.debug = logger.debug.bind(logger);
 console.trace = logger.trace.bind(logger);
 
 // Initialize the Java pipe.
-initialize(process.env["PIPE_NAME"] ?? "laudiolin");
+initialize(parseInt(process.env["PORT"] ?? "47599"));
 
 // Define constants.
 export const storagePath = process.env["STORAGE_PATH"] ?? `${process.cwd()}/files`;

@@ -1,6 +1,6 @@
 import { YouTubeStreamReq, YouTubeStreamRsp } from "@app/Messages";
 
-import { Socket } from "net";
+import { WebSocket } from "ws";
 
 import { sendPacket } from "@app/java";
 import { extractId } from "@app/utils";
@@ -47,7 +47,7 @@ async function streamInternal(
     return { length, buffer };
 }
 
-export default async function(socket: Socket, retcode: number, req: Buffer) {
+export default async function(socket: WebSocket, retcode: number, req: Buffer) {
     const { videoId, quality, start, end } = YouTubeStreamReq.fromBinary(req);
 
     // Parse the video ID.

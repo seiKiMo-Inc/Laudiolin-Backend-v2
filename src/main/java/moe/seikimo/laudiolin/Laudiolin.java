@@ -14,6 +14,7 @@ import moe.seikimo.laudiolin.gateway.Gateway;
 import moe.seikimo.laudiolin.objects.Constants;
 import moe.seikimo.laudiolin.routers.*;
 import moe.seikimo.laudiolin.utils.EncodingUtils;
+import moe.seikimo.laudiolin.utils.NetUtils;
 import moe.seikimo.laudiolin.utils.SpotifyUtils;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
@@ -24,9 +25,9 @@ import org.jline.terminal.TerminalBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileNotFoundException;
 import java.io.IOError;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -87,15 +88,19 @@ public final class Laudiolin {
             }
 
             {
+                var networkPort = arguments.containsKey("port") ?
+                        Integer.parseInt(arguments.get("port")) :
+                        NetUtils.findFreePort();
+
                 // Check if a Node instance should start.
-                if (!arguments.containsKey("no-node") && !Laudiolin.startNode()) {
+                if (!arguments.containsKey("no-node") &&
+                        !Laudiolin.startNode(networkPort)) {
                     return;
                 }
 
                 // Create a node instance.
-                Laudiolin.node = new Node(arguments.getOrDefault(
-                        "pipe", "laudiolin"));
-                logger.info("Node instance created.");
+                Laudiolin.node = new Node(networkPort);
+                Laudiolin.node.connect();
             }
 
             {
@@ -154,7 +159,7 @@ public final class Laudiolin {
             // Log the startup time.
             logger.info("Laudiolin backend started in {}ms.",
                     System.currentTimeMillis() - startTime);
-        } catch (FileNotFoundException ignored) {
+        } catch (URISyntaxException ignored) {
             logger.error("Unable to find the Node pipe.");
         } catch (IOException exception) {
             logger.error("Failed to start Laudiolin.", exception);
@@ -195,13 +200,12 @@ public final class Laudiolin {
     /**
      * Starts a Node instance.
      *
+     * @param port The port to use.
      * @return Whether the Node instance started successfully.
      */
-    private static boolean startNode() {
+    private static boolean startNode(int port) {
         var nodeExecutable = arguments.getOrDefault(
                 "node", "node");
-        var pipeName = arguments.getOrDefault(
-                "pipe", "laudiolin");
 
         var storagePath = Constants.STORAGE_PATH.getAbsolutePath();
 
@@ -211,7 +215,7 @@ public final class Laudiolin {
             Laudiolin.nodeProcess = runtime.exec(
                     nodeExecutable + " index.js",
                     new String[] {
-                            "PIPE_NAME=" + pipeName,
+                            "PORT=" + port,
                             "STORAGE_PATH=" + storagePath
                     }
             );

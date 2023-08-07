@@ -1,7 +1,7 @@
 import { Track, YouTubeSearchReq, YouTubeSearchRsp } from "@app/Messages";
 import { sendPacket } from "@app/java";
 
-import { Socket } from "net";
+import { WebSocket } from "ws";
 
 import { youtube, ytMusic } from "@app/index";
 import { parseVideo } from "@app/utils";
@@ -162,7 +162,7 @@ async function searchRegular(query: string): Promise<Track[]> {
     }
 }
 
-export default async function(socket: Socket, retcode: number, req: Buffer){
+export default async function(socket: WebSocket, retcode: number, req: Buffer){
     const { query, youtubeMusic } = YouTubeSearchReq.fromBinary(req);
 
     try {

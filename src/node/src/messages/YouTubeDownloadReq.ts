@@ -1,7 +1,7 @@
 import { YouTubeDownloadReq, YouTubeDownloadRsp } from "@app/Messages";
 import { sendPacket } from "@app/java";
 
-import { Socket } from "net";
+import { WebSocket } from "ws";
 import { existsSync, createWriteStream, rmSync } from "fs";
 import ffmpeg from "fluent-ffmpeg";
 import { join } from "path";
@@ -58,7 +58,7 @@ async function downloadInternal(id: string): Promise<string> {
     return filePath;
 }
 
-export default async function(socket: Socket, retcode: number, req: Buffer){
+export default async function(socket: WebSocket, retcode: number, req: Buffer){
     const request = YouTubeDownloadReq.fromBinary(req);
 
     // Parse the video ID.
