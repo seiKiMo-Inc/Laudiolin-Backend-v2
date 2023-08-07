@@ -1,11 +1,13 @@
 package moe.seikimo.laudiolin.routers;
 
 import io.javalin.Javalin;
+import io.javalin.http.ContentType;
 import io.javalin.http.Context;
 import io.javalin.http.servlet.JavalinServletContext;
 import moe.seikimo.laudiolin.Config;
 import moe.seikimo.laudiolin.Laudiolin;
 import moe.seikimo.laudiolin.utils.HttpUtils;
+import moe.seikimo.laudiolin.utils.ResourceUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -14,10 +16,14 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static moe.seikimo.laudiolin.utils.HttpUtils.RATE_LIMITED;
 
 public interface SiteRouter {
+    AtomicReference<byte[]> FAVORITE_IMAGE
+            = new AtomicReference<>();
+
     Map<String, Integer> RATE_LIMITS
             = new ConcurrentHashMap<>();
     List<String> RATE_LIMITED
@@ -29,6 +35,10 @@ public interface SiteRouter {
      * @param javalin The Javalin instance.
      */
     static void configure(Javalin javalin) {
+        // Load the favorite image.
+        var image = ResourceUtils.getResource("Favorite.png");
+        FAVORITE_IMAGE.set(image);
+
         // Set the task for resetting rate limits.
         var limits = Config.get().rateLimits;
         var resetTime = TimeUnit.MILLISECONDS.convert(
@@ -42,6 +52,9 @@ public interface SiteRouter {
                 new UpdateLimitsTask(), withinTime, withinTime);
 
         javalin.get("/", SiteRouter::redirect);
+        javalin.get("/Favorite.png", (ctx) -> ctx
+                .contentType(ContentType.IMAGE_JPEG)
+                .result(FAVORITE_IMAGE.get()));
         javalin.before(SiteRouter::rateLimit);
     }
 
