@@ -7,6 +7,9 @@
         // Send the token to the Laudiolin desktop app.
         window.location = `laudiolin://login?token=${token}`;
     }
-    // Redirect to the Laudiolin web app.
-    window.location = "https://laudiolin.seikimo.moe";
+
+    setTimeout(() => {
+        // Redirect to the Laudiolin web app.
+        window.location = "https://laudiolin.seikimo.moe";
+    }, 5e3);
 </script>
