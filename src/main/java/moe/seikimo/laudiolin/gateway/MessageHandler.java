@@ -8,6 +8,8 @@ import moe.seikimo.laudiolin.objects.JObject;
 import moe.seikimo.laudiolin.utils.AccountUtils;
 import moe.seikimo.laudiolin.utils.EncodingUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -138,14 +140,30 @@ public interface MessageHandler {
             var user = session.getUser();
             var recents = user.getRecentlyPlayed();
 
-            // Add the track to the user's recently played.
-            if (recents.size() >= 10)
-                recents.remove(9);
-            recents.add(0, track);
+            var mostRecent = recents.get(0);
+            if (!mostRecent.equals(track)) {
+                // Add the track to the user's recently played.
+                if (recents.size() >= 10)
+                    recents.remove(9);
+                recents.add(0, track);
 
-            // Apply and save the changes.
-            user.setRecentlyPlayed(recents);
-            user.save();
+                // Remove any duplicates.
+                List<TrackData> newList = new ArrayList<>();
+                for (var recentTrack : recents) {
+                    if (!newList.contains(recentTrack))
+                        newList.add(recentTrack);
+                }
+
+                // Apply and save the changes.
+                user.setRecentlyPlayed(newList);
+                user.save();
+
+                // Send a gateway message.
+                session.sendMessage(JObject.c()
+                        .add("type", "recents")
+                        .add("recents", newList)
+                        .add("timestamp", System.currentTimeMillis()));
+            }
         }
 
         // Update the user's player information.
