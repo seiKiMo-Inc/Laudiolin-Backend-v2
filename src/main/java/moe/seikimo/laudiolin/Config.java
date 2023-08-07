@@ -76,6 +76,7 @@ public final class Config {
     @Data
     public static final class Discord {
         private String discordClientId = "";
+        private String logoHash = "";
         private boolean presenceDetails = false;
     }
 

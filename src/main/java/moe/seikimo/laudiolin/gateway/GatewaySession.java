@@ -206,7 +206,7 @@ public final class GatewaySession {
         var assets = Assets.builder()
                 .largeImage(track.getIcon())
                 .largeText(track.getTitle())
-                .smallImage("icon")
+                .smallImage(config.discord.getLogoHash())
                 .smallText("Laudiolin");
         var presence = DiscordPresence.builder()
                 .platform(Platform.DESKTOP.getValue())
