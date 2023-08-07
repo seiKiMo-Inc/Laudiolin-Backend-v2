@@ -294,6 +294,27 @@ public final class GatewaySession {
     }
 
     /**
+     * Updates the seek position of the client.
+     *
+     * @param seek The seek position.
+     */
+    public void updateSeek(float seek) {
+        // Get the existing online user.
+        var userId = this.getUser().getUserId();
+        var online = Gateway.getOnlineUsers().get(userId);
+        if (online == null) {
+            this.updateOnlineStatus(seek);
+            return;
+        }
+
+        // Update the online user.
+        online.setProgress(seek);
+        this.setTrackPosition(seek);
+
+        Gateway.getOnlineUsers().put(userId, online);
+    }
+
+    /**
      * @return The client as an online user.
      */
     public OnlineUser asOnlineUser() {

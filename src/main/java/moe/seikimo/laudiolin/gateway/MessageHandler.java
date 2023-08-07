@@ -88,7 +88,7 @@ public interface MessageHandler {
      * @param message The message that was sent.
      */
     static void seek(GatewaySession session, JsonObject message) {
-        session.setTrackPosition(message.get("seek").getAsFloat());
+        session.updateSeek(message.get("seek").getAsFloat());
     }
 
     /**
