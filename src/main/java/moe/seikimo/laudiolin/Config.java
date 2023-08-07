@@ -59,6 +59,7 @@ public final class Config {
     private int port = 3000;
     private String appTarget = "https://app.seikimo.moe";
     private String webTarget = "https://laudiolin.seikimo.moe";
+    private String ffmpegPath = "/usr/bin/ffmpeg";
     private String mongoUri = "mongodb://localhost:27017";
     private String storagePath = "files";
 

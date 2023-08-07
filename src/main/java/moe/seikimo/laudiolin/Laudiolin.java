@@ -221,7 +221,8 @@ public final class Laudiolin {
                     nodeExecutable + " index.js",
                     new String[] {
                             "PORT=" + port,
-                            "STORAGE_PATH=" + storagePath
+                            "STORAGE_PATH=" + storagePath,
+                            "FFMPEG_PATH=" + Config.get().getFfmpegPath(),
                     }
             );
 
