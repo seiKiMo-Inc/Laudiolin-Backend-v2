@@ -11,6 +11,8 @@ import moe.seikimo.laudiolin.Laudiolin;
 import moe.seikimo.laudiolin.models.OfflineUser;
 import moe.seikimo.laudiolin.models.OnlineUser;
 import moe.seikimo.laudiolin.objects.JObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.time.Duration;
@@ -20,6 +22,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class Gateway {
+    private static final Logger logger
+            = LoggerFactory.getLogger("Gateway");
     private static final Map<String, GatewaySession> sessions
             = new ConcurrentHashMap<>();
 
@@ -102,12 +106,19 @@ public final class Gateway {
             if (handler == null) {
                 ctx.send(GATEWAY_UNKNOWN_MESSAGE());
                 ctx.closeSession();
+
+                logger.debug("Unknown gateway message received from {}: {}",
+                        ctx.getSessionId(), messageType);
             } else try {
                 handler.handle(session, content);
-            } catch (Exception ignored) {
+            } catch (Exception exception) {
                 // This is thrown when a JSON parsing error occurs.
                 ctx.send(GATEWAY_UNKNOWN_MESSAGE());
                 ctx.closeSession();
+
+                logger.debug("Encountered error while handling message {} from {}: {}.",
+                        messageType, ctx.getSessionId(), exception.getMessage());
+                logger.debug("Message handling exception caught!", exception);
             }
         } catch (Exception ignored) {
             ctx.send(INVALID_JSON()); // Send an error message.
