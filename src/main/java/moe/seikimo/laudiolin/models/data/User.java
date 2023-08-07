@@ -47,7 +47,10 @@ public class User implements DatabaseObject<User> {
 
         // Fetch the legacy user data.
         var legacy = legacyUsers.find(new Document("userId", discordId)).first();
-        if (legacy == null) return;
+        if (legacy == null) {
+            user.save();
+            return;
+        }
 
         // Convert all playlists.
         List<Playlist> playlists = new ArrayList<>();

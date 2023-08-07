@@ -91,7 +91,6 @@ public interface UserRouter {
                             .replace("[[TOKEN]]", token));
         } catch (Exception ignored) {
             ctx.status(400).json(INVALID_ARGUMENTS());
-            ignored.printStackTrace();
         }
     }
 
