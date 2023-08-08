@@ -177,7 +177,7 @@ public final class GatewaySession {
     public void updatePresence(boolean bypass) {
         // Check if the client should update.
         if (!bypass && System.currentTimeMillis() -
-                this.getLastUpdateTime() < 4e3) return;
+                this.getLastUpdateTime() < 5e3) return;
         // Update the last update time.
         this.setLastUpdateTime(System.currentTimeMillis());
 
