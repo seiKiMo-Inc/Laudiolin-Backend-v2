@@ -11,12 +11,14 @@ import se.michaelthelin.spotify.model_objects.specification.Track;
 import se.michaelthelin.spotify.requests.authorization.client_credentials.ClientCredentialsRequest;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public interface SpotifyUtils {
+    Map<String, Track> ISRC_CACHE = new ConcurrentHashMap<>();
+    Map<TrackData, String> TRACK_CACHE = new ConcurrentHashMap<>();
+
     SpotifyApi SPOTIFY = new SpotifyApi.Builder()
             .setClientId(Config.get().spotify.getClientId())
             .setClientSecret(Config.get().spotify.getClientSecret())
@@ -163,11 +165,17 @@ public interface SpotifyUtils {
         var node = Laudiolin.getNode();
 
         // Get the track by ID.
-        var track = id.length() == 12 ?
-                SpotifyUtils.searchIsrc(id) :
-                SpotifyUtils.searchSpotifyId(id);
+        var track = ISRC_CACHE.get(id);
+        if (track == null) {
+            track = ISRC_CACHE.computeIfAbsent(id, k -> k.length() == 12 ?
+                    SpotifyUtils.searchIsrc(id) :
+                    SpotifyUtils.searchSpotifyId(id));
+        }
         if (track == null) return "";
         var trackData = SpotifyUtils.toTrackData(track);
+
+        var youtubeId = TRACK_CACHE.get(trackData);
+        if (youtubeId != null) return youtubeId;
 
         // Prepare a YouTube query.
         var query = String.format("%s - %s - Topic",
@@ -176,7 +184,8 @@ public interface SpotifyUtils {
         var search = node.youtubeSearch(query, false);
         if (search.isEmpty()) return "";
 
-        return search.get(0).getId();
+        return TRACK_CACHE.computeIfAbsent(
+                trackData, k -> search.get(0).getId());
     }
 
     /**
