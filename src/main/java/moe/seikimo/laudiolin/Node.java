@@ -5,12 +5,14 @@ import lombok.SneakyThrows;
 import moe.seikimo.laudiolin.Messages.*;
 import moe.seikimo.laudiolin.models.data.Playlist;
 import moe.seikimo.laudiolin.models.data.TrackData;
+import moe.seikimo.laudiolin.objects.Constants;
 import moe.seikimo.laudiolin.utils.RandomUtils;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
@@ -173,6 +175,10 @@ public final class Node extends WebSocketClient {
      */
     @SneakyThrows
     public String youtubeDownload(String id) {
+        // Check if the file exists on the local machine.
+        var file = new File(Constants.STORAGE_PATH, id + ".mp3");
+        if (file.exists()) return file.getAbsolutePath();
+
         // Send the packet and expect a response.
         var data = this.sendExpect(
                 PacketIds._YouTubeDownloadReq,
