@@ -161,8 +161,9 @@ public final class Node extends WebSocketClient {
         var response = YouTubeSearchRsp.parseFrom(data);
 
         // Check if the search was successful.
-        if (!response.getSuccessful())
-            throw new RuntimeException("Failed to search YouTube.");
+        if (!response.getSuccessful()) {
+            this.logger.warn("YouTube search failed. See above for reason.");
+        }
 
         return response.getResultsList();
     }

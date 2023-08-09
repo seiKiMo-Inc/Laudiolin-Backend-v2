@@ -22,7 +22,7 @@ message Track {
   repeated string artists = 3;
   string icon = 4;
   string url = 5;
-  uint32 duration = 6;
+  int32 duration = 6;
 }
 
 message Playlist {
