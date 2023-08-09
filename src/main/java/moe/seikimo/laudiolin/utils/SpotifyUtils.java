@@ -177,15 +177,24 @@ public interface SpotifyUtils {
         var youtubeId = TRACK_CACHE.get(trackData);
         if (youtubeId != null) return youtubeId;
 
+        // Perform the first YouTube search. (ISRC)
+        var isrc = track.getExternalIds().getExternalIds().get("isrc");
+        var search = node.youtubeSearch(isrc, true);
+        var first = search.isEmpty() ? null : search.get(0);
+        if (first != null && first.getTitle().contains(trackData.getTitle())) {
+            return TRACK_CACHE.computeIfAbsent(
+                    trackData, k -> first.getId());
+        }
+
         // Prepare a YouTube query.
         var query = String.format("%s - %s - Topic",
                 trackData.getTitle(), trackData.getArtist());
-        // Perform a YouTube search.
-        var search = node.youtubeSearch(query, false);
-        if (search.isEmpty()) return "";
+        // Perform a second YouTube search. (song name)
+        var search2 = node.youtubeSearch(query, true);
+        if (search2.isEmpty()) return "";
 
         return TRACK_CACHE.computeIfAbsent(
-                trackData, k -> search.get(0).getId());
+                trackData, k -> search2.get(0).getId());
     }
 
     /**
