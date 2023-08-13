@@ -1,6 +1,8 @@
 package moe.seikimo.laudiolin.gateway;
 
 import com.google.gson.JsonObject;
+import moe.seikimo.laudiolin.Config;
+import moe.seikimo.laudiolin.models.ElixirMessages;
 import moe.seikimo.laudiolin.models.InitializeMessage;
 import moe.seikimo.laudiolin.models.data.TrackData;
 import moe.seikimo.laudiolin.objects.DiscordPresence;
@@ -11,7 +13,6 @@ import moe.seikimo.laudiolin.utils.EncodingUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import static moe.seikimo.laudiolin.gateway.Gateway.GATEWAY_INVALID_TOKEN;
 
@@ -40,6 +41,15 @@ public interface MessageHandler {
         var data = EncodingUtils.jsonDecode(
                 message, InitializeMessage.class);
 
+        // Check if the connection is an Elixir.
+        if (Config.get().elixir.getToken()
+                .equals(data.getToken())) {
+            session.setInitialized(true); // Initialize the user.
+            Gateway.addUser(data.getGuildId(), session); // Add the user to the connected users list.
+            System.out.println("elixir connected, guild " + data.getGuildId());
+            return;
+        }
+
         // Fetch the user by token.
         var user = AccountUtils.getUser(data.getToken());
         if (user == null) {
@@ -61,11 +71,7 @@ public interface MessageHandler {
         DiscordPresence.apply(user, null);
 
         // Add the user to the connected users list.
-        var users = Gateway.getUsers();
-        if (!users.containsKey(user.getUserId())) {
-            users.put(user.getUserId(), new CopyOnWriteArrayList<>());
-        }
-        users.get(user.getUserId()).add(session);
+        Gateway.addUser(user.getUserId(), session);
 
         session.setInitialized(true); // Mark the client as initialized.
         session.pingClient(); // Ping the client.
@@ -191,5 +197,11 @@ public interface MessageHandler {
         session.sendMessage(JObject.c()
                 .add("type", "volume")
                 .add("volume", session.getVolume()));
+    }
+
+    /* -------------------------------------------------- ELIXIR -------------------------------------------------- */
+
+    static void voiceChannel(GatewaySession session, JsonObject raw) {
+        var message = EncodingUtils.jsonDecode(raw, ElixirMessages.ChannelCheck.class);
     }
 }

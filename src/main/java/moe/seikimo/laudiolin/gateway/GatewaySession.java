@@ -202,7 +202,7 @@ public final class GatewaySession {
 
         // Build the presence.
         var config = Config.get();
-        var clientId = config.discord.getDiscordClientId();
+        var clientId = config.discord.getClientId();
         var webTarget = config.getWebTarget();
 
         var assets = Assets.builder()

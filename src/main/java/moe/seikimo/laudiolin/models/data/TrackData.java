@@ -27,6 +27,13 @@ public class TrackData {
         // Empty constructor for Morphia.
     }
 
+    @Override
+    public String toString() {
+        return "%s - %s (%s) of duration %s seconds".formatted(
+                this.title, this.artist, this.id, this.duration
+        );
+    }
+
     /**
      * Converts a {@link Document} to a {@link TrackData}.
      *

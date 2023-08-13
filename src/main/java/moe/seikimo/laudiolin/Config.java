@@ -64,6 +64,7 @@ public final class Config {
     private String storagePath = "files";
 
     public SeiKiMo seikimo = new SeiKiMo();
+    public Elixir elixir = new Elixir();
     public Discord discord = new Discord();
     public Spotify spotify = new Spotify();
     public RateLimits rateLimits = new RateLimits();
@@ -75,8 +76,13 @@ public final class Config {
     }
 
     @Data
+    public static final class Elixir {
+        private String token = "";
+    }
+
+    @Data
     public static final class Discord {
-        private String discordClientId = "";
+        private String clientId = "";
         private String logoHash = "";
         private boolean presenceDetails = false;
     }

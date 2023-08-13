@@ -16,10 +16,12 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public final class Gateway {
     private static final Logger logger
@@ -55,6 +57,21 @@ public final class Gateway {
             config.onClose(Gateway::onClose);
             config.onError(Gateway::onError);
         });
+    }
+
+    /**
+     * Adds a user to the connected users list.
+     *
+     * @param userId The user ID.
+     * @param session The session.
+     */
+    public static void addUser(String userId, GatewaySession session) {
+        // Add the user to the connected users list.
+        var users = Gateway.getUsers();
+        if (!users.containsKey(userId)) {
+            users.put(userId, new CopyOnWriteArrayList<>());
+        }
+        users.get(userId).add(session);
     }
 
     /**
@@ -161,13 +178,20 @@ public final class Gateway {
      */
     @Nullable
     public static GatewaySession getConnectedUser(String userId) {
-        return Gateway.sessions.values().stream()
-                .filter(session -> {
-                    var user = session.getUser();
-                    return user != null &&
-                            user.getUserId().equals(userId);
-                })
-                .findFirst().orElse(null);
+        var sessions = Gateway.getUsers().get(userId);
+        if (sessions == null || sessions.isEmpty()) return null;
+
+        return sessions.get(0); // Return the first session.
+    }
+
+    /**
+     * Fetches the connected users.
+     *
+     * @param userId The user ID.
+     * @return The sessions associated.
+     */
+    public static List<GatewaySession> getConnectedUsers(String userId) {
+        return Gateway.getUsers().getOrDefault(userId, new ArrayList<>());
     }
 
     /** This message is sent when the client first connects. */

@@ -9,4 +9,6 @@ public final class InitializeMessage {
     private String token;
     private SocialStatus broadcast;
     private PresenceMode presence;
+
+    private String guildId;
 }

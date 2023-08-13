@@ -78,6 +78,20 @@ public interface SpotifyUtils {
     }
 
     /**
+     * Searches by a general ID.
+     *
+     * @param id The ID to search for.
+     * @return The search result.
+     */
+    static Track searchId(String id) {
+        if (id.length() == 22) {
+            return SpotifyUtils.searchSpotifyId(id);
+        } else if (id.length() == 12) {
+            return SpotifyUtils.searchIsrc(id);
+        } else throw new RuntimeException("Invalid ID.");
+    }
+
+    /**
      * Searches a Spotify ID for a track.
      *
      * @param spotifyId The Spotify ID to search for.
