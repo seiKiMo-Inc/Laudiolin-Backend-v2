@@ -16,4 +16,24 @@ public interface ElixirUtils {
                 .add("type", "playTrack")
                 .add("track", track));
     }
+
+    /**
+     * Resumes the audio player.
+     *
+     * @param elixir The Elixir session to send the message to.
+     */
+    static void resume(GatewaySession elixir) {
+        elixir.sendMessage(JObject.c()
+                .add("type", "resume"));
+    }
+
+    /**
+     * Pauses the audio player.
+     *
+     * @param elixir The Elixir session to send the message to.
+     */
+    static void pause(GatewaySession elixir) {
+        elixir.sendMessage(JObject.c()
+                .add("type", "pause"));
+    }
 }

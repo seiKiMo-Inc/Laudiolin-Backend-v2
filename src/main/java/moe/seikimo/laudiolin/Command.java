@@ -105,6 +105,44 @@ public final class Command {
                     logger.info("Playing track {}.", track);
                 }
             }
+            case "resume" -> {
+                // Check for a target guild.
+                if (Command.targetGuildId == null) {
+                    logger.info("No target guild ID set.");
+                    logger.info("Usage: /elixir target <guildId>");
+                    return;
+                }
+
+                // Fetch the guild.
+                var guild = Gateway.getConnectedUser(targetGuildId);
+                if (guild == null) {
+                    logger.info("No guild found with ID {}.", Command.targetGuildId);
+                    return;
+                }
+
+                // Resume the player.
+                ElixirUtils.resume(guild);
+                logger.info("Resumed player.");
+            }
+            case "pause" -> {
+                // Check for a target guild.
+                if (Command.targetGuildId == null) {
+                    logger.info("No target guild ID set.");
+                    logger.info("Usage: /elixir target <guildId>");
+                    return;
+                }
+
+                // Fetch the guild.
+                var guild = Gateway.getConnectedUser(targetGuildId);
+                if (guild == null) {
+                    logger.info("No guild found with ID {}.", Command.targetGuildId);
+                    return;
+                }
+
+                // Pause the player.
+                ElixirUtils.pause(guild);
+                logger.info("Paused player.");
+            }
         }
     }
 }
