@@ -85,11 +85,12 @@ public interface StreamRouter {
             }
 
             // Serve the file.
+            var file = Files.readAllBytes(Path.of(path));
             ctx
                     .status(200)
                     .contentType(ContentType.AUDIO_MPEG)
-                    .header("Connection-Type", "keep-alive")
-                    .result(Files.readAllBytes(Path.of(path)));
+                    .header("Content-Length", String.valueOf(file.length))
+                    .result(file);
         } catch (Exception exception) {
             ctx.status(500);
             Laudiolin.getLogger().warn("Failed to download video.", exception);
