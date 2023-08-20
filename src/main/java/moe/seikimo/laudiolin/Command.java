@@ -250,6 +250,41 @@ public final class Command {
                     logger.info("Seeked to position {}.", position);
                 }
             }
+            case "queue" -> {
+                // Check for a target guild.
+                if (Command.targetGuildId == null) {
+                    logger.info("No target guild ID set.");
+                    logger.info("Usage: /elixir target <guildId>");
+                    return;
+                }
+
+                // Fetch the guild.
+                var guild = Gateway.getConnectedUser(targetGuildId);
+                if (guild == null) {
+                    logger.info("No guild found with ID {}.", Command.targetGuildId);
+                    return;
+                }
+
+                // Get the current track.
+                var currentTrack = guild.getTrackData();
+                if (currentTrack != null) {
+                    logger.info("Current track: {}.", currentTrack);
+                }
+
+                // Get the queue.
+                var queue = ElixirUtils.queue(guild);
+                if (queue.isEmpty()) {
+                    logger.info("Queue is empty.");
+                    return;
+                }
+
+                // Print the queue.
+                logger.info("Queue:");
+                for (var i = 0; i < queue.size(); i++) {
+                    var track = queue.get(i);
+                    logger.info("{}. {}.", i + 1, track);
+                }
+            }
         }
     }
 }

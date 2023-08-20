@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class Gateway {
     private static final Logger logger
@@ -121,8 +122,13 @@ public final class Gateway {
             // Attempt to pre-handle the message.
             var preHandlers = session.getListeners().get(messageType);
             if (preHandlers != null && !preHandlers.isEmpty()) {
-                preHandlers.forEach(handler -> handler.accept(content));
+                var shouldSkip = new AtomicBoolean(false);
+                preHandlers.forEach(handler -> {
+                    if (!shouldSkip.get()) shouldSkip.set(handler.apply(content));
+                });
                 preHandlers.clear();
+
+                if (shouldSkip.get()) return;
             }
 
             // Attempt to handle the message.

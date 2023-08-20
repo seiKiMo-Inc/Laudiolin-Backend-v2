@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static moe.seikimo.laudiolin.gateway.Gateway.GATEWAY_INIT;
 import static moe.seikimo.laudiolin.gateway.Gateway.GATEWAY_PING;
@@ -36,7 +36,7 @@ public final class GatewaySession {
     // Internal gateway properties.
     private boolean initialized = false;
     private long lastPing = System.currentTimeMillis();
-    private final Map<String, List<Consumer<JsonObject>>> listeners = new HashMap<>();
+    private final Map<String, List<Function<JsonObject, Boolean>>> listeners = new HashMap<>();
 
     // The user's broadcasting settings.
     private SocialStatus broadcastStatus = SocialStatus.EVERYONE;
@@ -71,7 +71,7 @@ public final class GatewaySession {
      * @param messageType The message type to listen for.
      * @param handler The handler to call.
      */
-    public void addListener(String messageType, Consumer<JsonObject> handler) {
+    public void addListener(String messageType, Function<JsonObject, Boolean> handler) {
         var list = this.listeners.get(messageType);
         if (list == null) {
             list = new CopyOnWriteArrayList<>();

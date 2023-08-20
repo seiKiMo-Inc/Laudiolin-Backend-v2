@@ -1,7 +1,13 @@
 package moe.seikimo.laudiolin.utils;
 
+import com.google.gson.JsonObject;
 import moe.seikimo.laudiolin.gateway.GatewaySession;
+import moe.seikimo.laudiolin.models.data.TrackData;
 import moe.seikimo.laudiolin.objects.JObject;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public interface ElixirUtils {
     /**
@@ -80,5 +86,34 @@ public interface ElixirUtils {
         elixir.sendMessage(JObject.c()
                 .add("type", "seek")
                 .add("position", position));
+    }
+
+    /**
+     * Fetches the queue of the audio player.
+     *
+     * @param elixir The Elixir session to send the message to.
+     * @return The queue.
+     */
+    static List<TrackData> queue(GatewaySession elixir) {
+        // Prepare to receive the queue message.
+        var promise = new CompletableFuture<JsonObject>();
+        elixir.addListener("queue", promise::complete);
+
+        // Request the queue.
+        elixir.sendMessage(JObject.c()
+                .add("type", "queue"));
+
+        // Wait for the queue message.
+        var queueRaw = promise.join();
+        var tracks = queueRaw.get("queue").getAsJsonArray();
+        var queue = new ArrayList<TrackData>();
+
+        // De-serialize the queue.
+        for (var track : tracks) {
+            queue.add(EncodingUtils.jsonDecode(
+                    track, TrackData.class));
+        }
+
+        return queue;
     }
 }
