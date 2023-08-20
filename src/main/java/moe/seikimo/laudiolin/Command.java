@@ -217,6 +217,39 @@ public final class Command {
                 ElixirUtils.skip(guild, trackNumber);
                 logger.info("Skipped track.");
             }
+            case "seek" -> {
+                // Check if a position was specified.
+                if (args.isEmpty()) {
+                    logger.info("No arguments provided.");
+                    logger.info("Usage: /elixir seek <position>");
+                    return;
+                }
+
+                // Check for a target guild.
+                if (Command.targetGuildId == null) {
+                    logger.info("No target guild ID set.");
+                    logger.info("Usage: /elixir target <guildId>");
+                    return;
+                }
+
+                // Fetch the guild.
+                var guild = Gateway.getConnectedUser(targetGuildId);
+                if (guild == null) {
+                    logger.info("No guild found with ID {}.", Command.targetGuildId);
+                    return;
+                }
+
+                // Parse the position.
+                var position = Float.parseFloat(args.get(0));
+                if (position < 0) {
+                    logger.info("Position must be greater than 0.");
+                    return;
+                }
+
+                // Seek to the position.
+                ElixirUtils.seek(guild, (long) (position * 1000f));
+                logger.info("Seeked to position {}.", position);
+            }
         }
     }
 }

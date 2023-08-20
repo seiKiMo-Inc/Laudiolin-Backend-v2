@@ -69,4 +69,16 @@ public interface ElixirUtils {
                 .add("type", "skip")
                 .add("track", trackNumber));
     }
+
+    /**
+     * Seeks to the specified position in the current track.
+     *
+     * @param elixir The Elixir session to send the message to.
+     * @param position The position to seek to.
+     */
+    static void seek(GatewaySession elixir, long position) {
+        elixir.sendMessage(JObject.c()
+                .add("type", "seek")
+                .add("position", position));
+    }
 }
