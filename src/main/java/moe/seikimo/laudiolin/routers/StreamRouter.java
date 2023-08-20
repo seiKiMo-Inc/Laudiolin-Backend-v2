@@ -8,8 +8,9 @@ import moe.seikimo.laudiolin.Laudiolin;
 import moe.seikimo.laudiolin.enums.Source;
 import moe.seikimo.laudiolin.utils.SpotifyUtils;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static moe.seikimo.laudiolin.utils.HttpUtils.INVALID_ARGUMENTS;
 import static moe.seikimo.laudiolin.utils.HttpUtils.SUCCESS;
@@ -87,7 +88,8 @@ public interface StreamRouter {
             ctx
                     .status(200)
                     .contentType(ContentType.AUDIO_MPEG)
-                    .result(new FileInputStream(path));
+                    .header("Connection-Type", "keep-alive")
+                    .result(Files.readAllBytes(Path.of(path)));
         } catch (Exception exception) {
             ctx.status(500);
             Laudiolin.getLogger().warn("Failed to download video.", exception);
