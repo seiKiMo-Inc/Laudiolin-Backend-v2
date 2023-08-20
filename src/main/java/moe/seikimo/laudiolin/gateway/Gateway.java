@@ -118,6 +118,13 @@ public final class Gateway {
                 return;
             }
 
+            // Attempt to pre-handle the message.
+            var preHandlers = session.getListeners().get(messageType);
+            if (preHandlers != null && !preHandlers.isEmpty()) {
+                preHandlers.forEach(handler -> handler.accept(content));
+                preHandlers.clear();
+            }
+
             // Attempt to handle the message.
             var handler = Gateway.handlers.get(messageType);
             if (handler == null) {

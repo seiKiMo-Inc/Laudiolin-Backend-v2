@@ -18,8 +18,11 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 
 import static moe.seikimo.laudiolin.gateway.Gateway.GATEWAY_INIT;
 import static moe.seikimo.laudiolin.gateway.Gateway.GATEWAY_PING;
@@ -33,6 +36,7 @@ public final class GatewaySession {
     // Internal gateway properties.
     private boolean initialized = false;
     private long lastPing = System.currentTimeMillis();
+    private final Map<String, List<Consumer<JsonObject>>> listeners = new HashMap<>();
 
     // The user's broadcasting settings.
     private SocialStatus broadcastStatus = SocialStatus.EVERYONE;
@@ -58,6 +62,23 @@ public final class GatewaySession {
         return this.user == null ?
                 this.getGuildId() :
                 this.getUser().getUserId();
+    }
+
+    /**
+     * Adds a message pre-handler for the client.
+     * This will be called before the message is handled.
+     *
+     * @param messageType The message type to listen for.
+     * @param handler The handler to call.
+     */
+    public void addListener(String messageType, Consumer<JsonObject> handler) {
+        var list = this.listeners.get(messageType);
+        if (list == null) {
+            list = new CopyOnWriteArrayList<>();
+            this.listeners.put(messageType, list);
+        }
+
+        list.add(handler);
     }
 
     /**
@@ -309,19 +330,22 @@ public final class GatewaySession {
      * @param seek The seek position.
      */
     public void updateSeek(float seek) {
-        // Get the existing online user.
-        var userId = this.getUser().getUserId();
-        var online = Gateway.getOnlineUsers().get(userId);
-        if (online == null) {
-            this.updateOnlineStatus(seek);
-            return;
+        if (this.getUser() != null) {
+            // Get the existing online user.
+            var userId = this.getUser().getUserId();
+            var online = Gateway.getOnlineUsers().get(userId);
+            if (online == null) {
+                this.updateOnlineStatus(seek);
+                return;
+            }
+
+            // Update the online user.
+            online.setProgress(seek);
+            Gateway.getOnlineUsers().put(userId, online);
         }
 
-        // Update the online user.
-        online.setProgress(seek);
+        // Set the track progress.
         this.setTrackPosition(seek);
-
-        Gateway.getOnlineUsers().put(userId, online);
     }
 
     /**
