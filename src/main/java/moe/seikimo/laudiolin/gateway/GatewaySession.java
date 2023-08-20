@@ -28,6 +28,7 @@ import static moe.seikimo.laudiolin.gateway.Gateway.GATEWAY_PING;
 public final class GatewaySession {
     @NotNull private final Session session;
     private User user = null;
+    private String guildId = null;
 
     // Internal gateway properties.
     private boolean initialized = false;
@@ -49,6 +50,15 @@ public final class GatewaySession {
 
     private List<GatewaySession> listeningAlong = new CopyOnWriteArrayList<>();
     @Nullable private GatewaySession listeningWith = null;
+
+    /**
+     * @return The ID of this session.
+     */
+    public String getId() {
+        return this.user == null ?
+                this.getGuildId() :
+                this.getUser().getUserId();
+    }
 
     /**
      * Attempts to disconnect the client.

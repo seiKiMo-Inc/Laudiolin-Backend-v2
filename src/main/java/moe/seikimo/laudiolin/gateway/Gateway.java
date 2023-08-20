@@ -153,6 +153,11 @@ public final class Gateway {
         var session = Gateway.sessions.remove(ctx.getSessionId());
         if (session == null) return;
 
+        // Remove the client session from users.
+        var allUsers = Gateway.getUsers();
+        var userCollection = allUsers.get(session.getId());
+        if (userCollection != null) userCollection.remove(session);
+
         session.onDisconnect();
     }
 

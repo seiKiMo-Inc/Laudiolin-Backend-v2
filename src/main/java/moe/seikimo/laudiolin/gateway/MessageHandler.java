@@ -45,8 +45,8 @@ public interface MessageHandler {
         if (Config.get().elixir.getToken()
                 .equals(data.getToken())) {
             session.setInitialized(true); // Initialize the user.
+            session.setGuildId(data.getGuildId()); // Set the guild ID.
             Gateway.addUser(data.getGuildId(), session); // Add the user to the connected users list.
-            System.out.println("elixir connected, guild " + data.getGuildId());
             return;
         }
 

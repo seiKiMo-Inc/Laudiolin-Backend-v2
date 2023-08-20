@@ -91,19 +91,9 @@ public final class Command {
                 }
 
                 // Perform a lookup for the track.
-                var id = args.get(0);
-                var track = switch (Source.identify(null, id)) {
-                    case ALL, YOUTUBE -> TrackData.toTrack(Laudiolin.getNode().youtubeFetch(id));
-                    case SPOTIFY -> SpotifyUtils.toTrackData(SpotifyUtils.searchId(id));
-                    case UNKNOWN -> null;
-                };
-
-                if (track == null) {
-                    logger.info("No track found with ID {}.", id);
-                } else {
-                    ElixirUtils.playTrack(guild, track);
-                    logger.info("Playing track {}.", track);
-                }
+                var data = String.join(" ", args);
+                ElixirUtils.playTrack(guild, data);
+                logger.info("Playing using query '{}'.", data);
             }
             case "resume" -> {
                 // Check for a target guild.
@@ -142,6 +132,90 @@ public final class Command {
                 // Pause the player.
                 ElixirUtils.pause(guild);
                 logger.info("Paused player.");
+            }
+            case "volume" -> {
+                // Check if a volume was provided.
+                if (args.isEmpty()) {
+                    logger.info("No arguments provided.");
+                    logger.info("Usage: /elixir volume <volume>");
+                    return;
+                }
+
+                // Check for a target guild.
+                if (Command.targetGuildId == null) {
+                    logger.info("No target guild ID set.");
+                    logger.info("Usage: /elixir target <guildId>");
+                    return;
+                }
+
+                // Fetch the guild.
+                var guild = Gateway.getConnectedUser(targetGuildId);
+                if (guild == null) {
+                    logger.info("No guild found with ID {}.", Command.targetGuildId);
+                    return;
+                }
+
+                // Parse the volume.
+                var volume = Integer.parseInt(args.get(0));
+                if (volume < 0 || volume > 100) {
+                    logger.info("Volume must be between 0 and 100.");
+                    return;
+                }
+
+                // Set the volume.
+                ElixirUtils.volume(guild, volume);
+                logger.info("Set volume to {}.", volume);
+            }
+            case "shuffle" -> {
+                // Check for a target guild.
+                if (Command.targetGuildId == null) {
+                    logger.info("No target guild ID set.");
+                    logger.info("Usage: /elixir target <guildId>");
+                    return;
+                }
+
+                // Fetch the guild.
+                var guild = Gateway.getConnectedUser(targetGuildId);
+                if (guild == null) {
+                    logger.info("No guild found with ID {}.", Command.targetGuildId);
+                    return;
+                }
+
+                // Shuffle the queue.
+                ElixirUtils.shuffle(guild);
+                logger.info("Shuffled queue.");
+            }
+            case "skip" -> {
+                // Check for a target guild.
+                if (Command.targetGuildId == null) {
+                    logger.info("No target guild ID set.");
+                    logger.info("Usage: /elixir target <guildId>");
+                    return;
+                }
+
+                // Fetch the guild.
+                var guild = Gateway.getConnectedUser(targetGuildId);
+                if (guild == null) {
+                    logger.info("No guild found with ID {}.", Command.targetGuildId);
+                    return;
+                }
+
+                // Check if a track number was specified.
+                var trackNumber = 1;
+                if (!args.isEmpty()) try {
+                    trackNumber = Integer.parseInt(args.get(0));
+                } catch (Exception ignored) {
+                    logger.info("Invalid track number provided.");
+                    return;
+                }
+                if (trackNumber < 1) {
+                    logger.info("Track number must be greater than 0.");
+                    return;
+                }
+
+                // Skip the current track.
+                ElixirUtils.skip(guild, trackNumber);
+                logger.info("Skipped track.");
             }
         }
     }
