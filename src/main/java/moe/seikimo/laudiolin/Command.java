@@ -1,10 +1,7 @@
 package moe.seikimo.laudiolin;
 
-import moe.seikimo.laudiolin.enums.Source;
 import moe.seikimo.laudiolin.gateway.Gateway;
-import moe.seikimo.laudiolin.models.data.TrackData;
 import moe.seikimo.laudiolin.utils.ElixirUtils;
-import moe.seikimo.laudiolin.utils.SpotifyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -268,7 +265,8 @@ public final class Command {
                 // Get the current track.
                 var currentTrack = guild.getTrackData();
                 if (currentTrack != null) {
-                    logger.info("Current track: {}.", currentTrack);
+                    logger.info("Current track: {}/{} seconds.",
+                            currentTrack, guild.getTrackPosition());
                 }
 
                 // Get the queue.
@@ -280,9 +278,55 @@ public final class Command {
 
                 // Print the queue.
                 logger.info("Queue:");
-                for (var i = 0; i < queue.size(); i++) {
+                for (var i = 0; i < Math.min(queue.size(), 50); i++) {
                     var track = queue.get(i);
                     logger.info("{}. {}.", i + 1, track);
+                }
+            }
+            case "loop" -> {
+                // Check if a loop type was specified.
+                if (args.isEmpty()) {
+                    logger.info("No arguments provided.");
+                    logger.info("Usage: /elixir loop <type>");
+                    return;
+                }
+
+                // Check for a target guild.
+                if (Command.targetGuildId == null) {
+                    logger.info("No target guild ID set.");
+                    logger.info("Usage: /elixir target <guildId>");
+                    return;
+                }
+
+                // Fetch the guild.
+                var guild = Gateway.getConnectedUser(targetGuildId);
+                if (guild == null) {
+                    logger.info("No guild found with ID {}.", Command.targetGuildId);
+                    return;
+                }
+
+                // Parse the loop type.
+                var loopType = args.get(0);
+                switch (loopType) {
+                    case "none", "0" -> {
+                        // Disable looping.
+                        ElixirUtils.loop(guild, 0);
+                        logger.info("Disabled looping.");
+                    }
+                    case "track", "2" -> {
+                        // Enable track looping.
+                        ElixirUtils.loop(guild, 2);
+                        logger.info("Enabled track looping.");
+                    }
+                    case "queue", "1" -> {
+                        // Enable queue looping.
+                        ElixirUtils.loop(guild, 1);
+                        logger.info("Enabled queue looping.");
+                    }
+                    default -> {
+                        logger.info("Invalid loop type provided.");
+                        logger.info("Usage: /elixir loop <type>");
+                    }
                 }
             }
         }

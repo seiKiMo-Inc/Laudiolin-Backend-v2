@@ -43,6 +43,7 @@ public final class GatewaySession {
     private PresenceMode broadcastPresence = PresenceMode.NONE;
 
     // The user's current player information.
+    private int loopMode = 0; // 0 = None, 1 = Queue, 2 = Track
     private float volume = 100;
     private float trackPosition = 0.0f;
     private boolean paused = true;

@@ -116,4 +116,17 @@ public interface ElixirUtils {
 
         return queue;
     }
+
+    /**
+     * Sets the loop mode of the audio player.
+     *
+     * @param elixir The Elixir session to send the message to.
+     * @param loopMode The loop mode to set.
+     */
+    static void loop(GatewaySession elixir, int loopMode) {
+        elixir.sendMessage(JObject.c()
+                .add("type", "loop")
+                .add("loopMode", loopMode));
+        elixir.setLoopMode(loopMode);
+    }
 }

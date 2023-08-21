@@ -201,7 +201,60 @@ public interface MessageHandler {
 
     /* -------------------------------------------------- ELIXIR -------------------------------------------------- */
 
-    static void voiceChannel(GatewaySession session, JsonObject raw) {
-        var message = EncodingUtils.jsonDecode(raw, ElixirMessages.ChannelCheck.class);
+    /**
+     * Handles the client's request to update the track state.
+     *
+     * @param session The session that sent the message.
+     * @param raw The raw message that was sent.
+     */
+    static void playing(GatewaySession session, JsonObject raw) {
+        // Check if the session is an Elixir.
+        if (session.getGuildId() == null) return;
+
+        // Apply the track data.
+        var message = EncodingUtils.jsonDecode(
+                raw, ElixirMessages.Playing.class);
+        var track = message.getTrack();
+
+        // Determine if the track is new.
+        if (track == null) {
+            session.setStartedListening(null);
+        } else if (!track.equals(session.getTrackData())) {
+            session.setStartedListening(System.currentTimeMillis());
+        }
+
+        session.setTrackData(message.getTrack());
+    }
+
+    /**
+     * Handles the client's request to update the track position.
+     *
+     * @param session The session that sent the message.
+     * @param raw The raw message that was sent.
+     */
+    static void pause(GatewaySession session, JsonObject raw) {
+        // Check if the session is an Elixir.
+        if (session.getGuildId() == null) return;
+
+        // Apply the track data.
+        var message = EncodingUtils.jsonDecode(
+                raw, ElixirMessages.Paused.class);
+        session.setPaused(message.isPause());
+    }
+
+    /**
+     * Handles the client's request to update the track position.
+     *
+     * @param session The session that sent the message.
+     * @param raw The raw message that was sent.
+     */
+    static void loop(GatewaySession session, JsonObject raw) {
+        // Check if the session is an Elixir.
+        if (session.getGuildId() == null) return;
+
+        // Apply the track data.
+        var message = EncodingUtils.jsonDecode(
+                raw, ElixirMessages.Loop.class);
+        session.setLoopMode(message.getLoopMode());
     }
 }

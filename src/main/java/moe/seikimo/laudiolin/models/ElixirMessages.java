@@ -1,20 +1,25 @@
 package moe.seikimo.laudiolin.models;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import moe.seikimo.laudiolin.models.data.TrackData;
 
 @SuppressWarnings("unused")
 public interface ElixirMessages {
-    @AllArgsConstructor
-    final class PlayTrack {
-        // This message is server -> client.
-        private final TrackData track;
+    @Getter
+    final class Playing {
+        // This message is client -> server.
+        private TrackData track;
     }
 
     @Getter
-    final class ChannelCheck {
+    final class Paused {
         // This message is client -> server.
-        private String userId;
+        private boolean pause;
+    }
+
+    @Getter
+    final class Loop {
+        // This message is both ways.
+        private int loopMode;
     }
 }
