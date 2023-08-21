@@ -6,6 +6,7 @@ import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import moe.seikimo.laudiolin.Laudiolin;
 import moe.seikimo.laudiolin.enums.Source;
+import moe.seikimo.laudiolin.utils.HttpUtils;
 import moe.seikimo.laudiolin.utils.SpotifyUtils;
 
 import java.io.IOException;
@@ -86,11 +87,31 @@ public interface StreamRouter {
 
             // Serve the file.
             var file = Files.readAllBytes(Path.of(path));
+            var data = file;
+
+            // Determine the range.
+            var range = HttpUtils.range(ctx);
+            if (range != null) {
+                // Get the range.
+                var start = range.first();
+                var end = range.second();
+                if (end == -1) {
+                    end = file.length - 1;
+                }
+
+                // Get the data.
+                var length = end - start + 1;
+                data = new byte[length];
+                System.arraycopy(file, start, data, 0, length);
+                ctx.header("Content-Range", "bytes " + start + "-" + end + "/" + file.length);
+            }
+
             ctx
                     .status(200)
                     .contentType(ContentType.AUDIO_MPEG)
-                    .header("Content-Length", String.valueOf(file.length))
-                    .result(file);
+                    .header("Content-Length", String.valueOf(data.length))
+                    .result(data)
+                    .status(HttpStatus.OK);
         } catch (Exception exception) {
             ctx.status(500);
             Laudiolin.getLogger().warn("Failed to download video.", exception);
@@ -113,6 +134,7 @@ public interface StreamRouter {
             ctx.status(400).json(INVALID_ARGUMENTS());
             return;
         }
+        if (quality == null) quality = "High";
 
         // Identify source.
         var source = Source.identify(engine, id);

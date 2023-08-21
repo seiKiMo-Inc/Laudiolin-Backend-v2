@@ -3,6 +3,7 @@ package moe.seikimo.laudiolin.utils;
 import com.google.gson.JsonObject;
 import io.javalin.http.Context;
 import moe.seikimo.laudiolin.objects.JObject;
+import moe.seikimo.laudiolin.objects.Pair;
 import okhttp3.*;
 
 import java.io.IOException;
@@ -124,6 +125,36 @@ public interface HttpUtils {
 
         // Return the request IP.
         return ctx.ip();
+    }
+
+    /**
+     * Parses the range header.
+     *
+     * @param ctx The context.
+     * @return The range.
+     */
+    static Pair<Integer, Integer> range(Context ctx) {
+        var range = ctx.header("Range");
+        if (range == null) return null;
+
+        // Check if the range is valid.
+        if (!range.startsWith("bytes=")) return null;
+
+        // Remove the bytes= part.
+        range = range.substring(6);
+
+        // Check if the range is valid.
+        if (!range.contains("-")) return null;
+
+        // Split the range.
+        var split = range.split("-");
+
+        // Parse the range.
+        var start = Integer.parseInt(split[0]);
+        var end = split.length == 1 ? -1 :
+                Integer.parseInt(split[1]);
+
+        return new Pair<>(start, end);
     }
 
     /**
