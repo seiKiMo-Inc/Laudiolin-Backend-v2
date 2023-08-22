@@ -51,7 +51,6 @@ public final class Gateway {
         this.put("playing", MessageHandler::playing);
         this.put("paused", MessageHandler::pause);
         this.put("loop", MessageHandler::loop);
-        this.put("guilds", MessageHandler::guilds);
     }};
 
     /**

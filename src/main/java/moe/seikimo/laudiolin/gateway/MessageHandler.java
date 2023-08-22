@@ -258,22 +258,4 @@ public interface MessageHandler {
                 raw, ElixirMessages.Loop.class);
         session.setLoopMode(message.getLoopMode());
     }
-
-    /**
-     * Handles the client's request to update the track position.
-     *
-     * @param session The session that sent the message.
-     * @param raw The raw message that was sent.
-     */
-    static void guilds(GatewaySession session, JsonObject raw) {
-        // Check if the session is an Elixir.
-        if (session.getGuildId() == null) return;
-
-        // Set the guilds the bot is in.
-        var message = EncodingUtils.jsonDecode(
-                raw, ElixirMessages.Guilds.class);
-        Gateway.getGuilds().put(
-                session.getId(),
-                message.getInGuilds());
-    }
 }
