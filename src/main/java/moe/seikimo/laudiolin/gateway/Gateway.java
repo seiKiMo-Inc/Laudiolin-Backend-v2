@@ -37,6 +37,9 @@ public final class Gateway {
     @Getter private static final Map<String, OfflineUser> offlineUsers
             = new ConcurrentHashMap<>();
 
+    @Getter private static final Map<String, List<String>> guilds
+            = new ConcurrentHashMap<>();
+
     private static final Map<String, MessageHandler> handlers = new HashMap<>() {{
         this.put("initialize", MessageHandler::initialize);
         this.put("latency", MessageHandler::latency);
@@ -48,6 +51,7 @@ public final class Gateway {
         this.put("playing", MessageHandler::playing);
         this.put("paused", MessageHandler::pause);
         this.put("loop", MessageHandler::loop);
+        this.put("guilds", MessageHandler::guilds);
     }};
 
     /**

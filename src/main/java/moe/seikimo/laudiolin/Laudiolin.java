@@ -150,6 +150,7 @@ public final class Laudiolin {
                 ProxyRouter.configure(javalin);
                 SocialRouter.configure(javalin);
                 StreamRouter.configure(javalin);
+                ElixirRouter.configure(javalin);
                 SearchRouter.configure(javalin);
                 PlaylistRouter.configure(javalin);
 

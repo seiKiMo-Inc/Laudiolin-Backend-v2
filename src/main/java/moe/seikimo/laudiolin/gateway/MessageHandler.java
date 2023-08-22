@@ -45,6 +45,7 @@ public interface MessageHandler {
         if (Config.get().elixir.getToken()
                 .equals(data.getToken())) {
             session.setInitialized(true); // Initialize the user.
+            session.setBotId(data.getBotId()); // Set the bot ID.
             session.setGuildId(data.getGuildId()); // Set the guild ID.
             Gateway.addUser(data.getGuildId(), session); // Add the user to the connected users list.
             return;
@@ -256,5 +257,23 @@ public interface MessageHandler {
         var message = EncodingUtils.jsonDecode(
                 raw, ElixirMessages.Loop.class);
         session.setLoopMode(message.getLoopMode());
+    }
+
+    /**
+     * Handles the client's request to update the track position.
+     *
+     * @param session The session that sent the message.
+     * @param raw The raw message that was sent.
+     */
+    static void guilds(GatewaySession session, JsonObject raw) {
+        // Check if the session is an Elixir.
+        if (session.getGuildId() == null) return;
+
+        // Set the guilds the bot is in.
+        var message = EncodingUtils.jsonDecode(
+                raw, ElixirMessages.Guilds.class);
+        Gateway.getGuilds().put(
+                session.getId(),
+                message.getInGuilds());
     }
 }

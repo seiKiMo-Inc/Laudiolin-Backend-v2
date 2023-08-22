@@ -10,5 +10,6 @@ public final class InitializeMessage {
     private SocialStatus broadcast;
     private PresenceMode presence;
 
+    private String botId;
     private String guildId;
 }

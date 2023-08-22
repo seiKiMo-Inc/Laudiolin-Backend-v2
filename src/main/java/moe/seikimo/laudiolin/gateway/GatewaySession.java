@@ -31,6 +31,8 @@ import static moe.seikimo.laudiolin.gateway.Gateway.GATEWAY_PING;
 public final class GatewaySession {
     @NotNull private final Session session;
     private User user = null;
+
+    private String botId = null;
     private String guildId = null;
 
     // Internal gateway properties.
