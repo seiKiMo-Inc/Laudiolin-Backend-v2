@@ -1,7 +1,9 @@
 package moe.seikimo.laudiolin.utils;
 
 import com.google.gson.JsonObject;
+import moe.seikimo.laudiolin.gateway.ElixirManager;
 import moe.seikimo.laudiolin.gateway.GatewaySession;
+import moe.seikimo.laudiolin.models.ElixirMessages;
 import moe.seikimo.laudiolin.models.data.TrackData;
 import moe.seikimo.laudiolin.objects.JObject;
 
@@ -105,16 +107,8 @@ public interface ElixirUtils {
 
         // Wait for the queue message.
         var queueRaw = promise.join();
-        var tracks = queueRaw.get("queue").getAsJsonArray();
-        var queue = new ArrayList<TrackData>();
-
-        // De-serialize the queue.
-        for (var track : tracks) {
-            queue.add(EncodingUtils.jsonDecode(
-                    track, TrackData.class));
-        }
-
-        return queue;
+        return EncodingUtils.jsonDecode(queueRaw,
+                ElixirMessages.Queue.class).getQueue();
     }
 
     /**
@@ -128,5 +122,20 @@ public interface ElixirUtils {
                 .add("type", "loop")
                 .add("loopMode", loopMode));
         elixir.setLoopMode(loopMode);
+    }
+
+    /* -------------------------------------------------- USER LAND -------------------------------------------------- */
+
+    /**
+     * Sends the queue of the selected bot to all controllers.
+     *
+     * @param initiator The session that requested the queue.
+     */
+    static void broadcastQueue(GatewaySession initiator) {
+        var queue = ElixirUtils.queue(initiator.getElixirSession());
+        var message = JObject.c()
+                .add("type", "queue")
+                .add("queue", queue);
+        ElixirManager.broadcastToAll(initiator, message);
     }
 }

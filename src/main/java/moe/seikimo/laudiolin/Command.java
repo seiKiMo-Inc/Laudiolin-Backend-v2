@@ -14,6 +14,7 @@ public final class Command {
     private static final Logger logger = LoggerFactory.getLogger("Command Output");
     private static final Map<String, Consumer<List<String>>> commands = new HashMap<>() {{
         this.put("elixir", Command::elixirCommand);
+        this.put("user", Command::userCommand);
     }};
 
     /**
@@ -328,6 +329,66 @@ public final class Command {
                         logger.info("Usage: /elixir loop <type>");
                     }
                 }
+            }
+        }
+    }
+
+    private static String targetUserId = null;
+
+    /**
+     * Command handler for '/user'.
+     *
+     * @param args The command arguments.
+     */
+    private static void userCommand(List<String> args) {
+        if (args.isEmpty()) {
+            logger.info("No arguments provided.");
+            logger.info("Usage: /user <list|target> <userId>");
+            return;
+        }
+
+        var subCommand = args.get(0);
+        args = args.subList(1, args.size());
+        switch (subCommand) {
+            default -> {
+                logger.info("Invalid sub-command provided.");
+                logger.info("Usage: /user <list|target> <userId>");
+            }
+            case "list" -> {
+                logger.info("Connected users:");
+                for (var users : Gateway.getUsers().entrySet()) {
+                    logger.info("User ID {}:", users.getKey());
+                    for (var i = 0; i < users.getValue().size(); i++) {
+                        var user = users.getValue().get(i);
+                        logger.info("  {}. {} (listening to {}).",
+                                i + 1, user, user.getTrackData());
+                    }
+                }
+            }
+            case "target" -> {
+                if (args.size() < 2) {
+                    logger.info("No arguments provided.");
+                    logger.info("Usage: /user target <userId> <index>");
+                    return;
+                }
+
+                // Parse the user ID.
+                var userId = args.get(0);
+                if (!Gateway.getUsers().containsKey(userId)) {
+                    logger.info("No user found with ID {}.", userId);
+                    return;
+                }
+
+                // Parse the index.
+                var index = Integer.parseInt(args.get(1));
+                if (index < 1) {
+                    logger.info("Index must be greater than 0.");
+                    return;
+                }
+
+                // Set the target user.
+                Command.targetUserId = userId;
+                logger.info("Set target user to {}.", userId);
             }
         }
     }

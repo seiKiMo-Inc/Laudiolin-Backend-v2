@@ -8,6 +8,7 @@ import moe.seikimo.laudiolin.models.data.TrackData;
 import moe.seikimo.laudiolin.objects.DiscordPresence;
 import moe.seikimo.laudiolin.objects.JObject;
 import moe.seikimo.laudiolin.utils.AccountUtils;
+import moe.seikimo.laudiolin.utils.ElixirUtils;
 import moe.seikimo.laudiolin.utils.EncodingUtils;
 
 import java.util.ArrayList;
@@ -95,7 +96,15 @@ public interface MessageHandler {
      * @param message The message that was sent.
      */
     static void seek(GatewaySession session, JsonObject message) {
-        session.updateSeek(message.get("seek").getAsFloat());
+        var seek = message.get("seek").getAsFloat();
+        session.updateSeek(seek);
+
+        if (session.getUser() == null) {
+            // Broadcast seek event to all clients.
+            ElixirManager.broadcastToAll(session, JObject.c()
+                    .add("type", "synchronize")
+                    .add("position", seek));
+        }
     }
 
     /**
@@ -194,10 +203,81 @@ public interface MessageHandler {
     static void volume(GatewaySession session, JsonObject message) {
         session.setVolume(message.get("volume").getAsInt());
 
-        // Send the volume back to the client.
-        session.sendMessage(JObject.c()
+        var response = JObject.c()
                 .add("type", "volume")
-                .add("volume", session.getVolume()));
+                .add("volume", session.getVolume());
+        if (session.isUsingElixir()) {
+            // Send the volume to all clients using Elixir.
+            ElixirUtils.volume(session.getElixirSession(), session.getVolume());
+            ElixirManager.broadcastToAll(session, response);
+        } else {
+            // Send the volume back to the client.
+            session.sendMessage(response);
+        }
+    }
+
+    /**
+     * Handles the client's request to select an Elixir.
+     *
+     * @param session The session that sent the message.
+     * @param message The message that was sent.
+     */
+    static void setElixir(GatewaySession session, JsonObject message) {
+        var guildIdRaw = message.get("guild");
+        var botIdRaw = message.get("bot");
+
+        if (guildIdRaw != null && !guildIdRaw.isJsonNull()) {
+            // Fetch the guild.
+            var guildId = guildIdRaw.getAsString();
+            var guild = Gateway.getConnectedUser(guildId);
+            if (guild == null) return;
+
+            // Determine the bot ID, from the message or by the guild.
+            var botId = botIdRaw != null && !botIdRaw.isJsonNull() ?
+                    botIdRaw.getAsString() : guild.getBotId();
+            if (botId.isEmpty()) botId = guild.getBotId();
+
+            // Set the selected Elixir.
+            session.setGuildId(guildId);
+            session.setBotId(botId);
+            session.setUsingElixir(true);
+            session.setElixirSession(guild);
+
+            ElixirManager.addControllingSession(session);
+        } else {
+            // Unset the selected Elixir.
+            session.setGuildId(null);
+            session.setBotId(null);
+            session.setUsingElixir(false);
+            session.setElixirSession(null);
+
+            ElixirManager.removeControllingSession(session);
+        }
+    }
+
+    /**
+     * Handles the client's request to use an Elixir.
+     *
+     * @param session The session that sent the message.
+     * @param message The message that was sent.
+     */
+    static void useElixir(GatewaySession session, JsonObject message) {
+        // Check if the session is using an Elixir.
+        if (!session.isUsingElixir()) return;
+        var elixir = session.getElixirSession();
+
+        switch (message.get("action").getAsString()) {
+            default -> session.disconnect();
+            case "shuffle" -> {
+                ElixirUtils.shuffle(elixir);
+                ElixirUtils.broadcastQueue(session);
+            }
+            case "skip" -> {
+                var toTrack = message.get("track").getAsInt();
+                ElixirUtils.skip(elixir, toTrack);
+                ElixirUtils.broadcastQueue(session);
+            }
+        }
     }
 
     /* -------------------------------------------------- ELIXIR -------------------------------------------------- */
@@ -210,7 +290,7 @@ public interface MessageHandler {
      */
     static void playing(GatewaySession session, JsonObject raw) {
         // Check if the session is an Elixir.
-        if (session.getGuildId() == null) return;
+        if (session.getUser() != null) return;
 
         // Apply the track data.
         var message = EncodingUtils.jsonDecode(
@@ -225,6 +305,11 @@ public interface MessageHandler {
         }
 
         session.setTrackData(message.getTrack());
+
+        // Broadcast the synchronization.
+        ElixirManager.broadcastToAll(session, JObject.c()
+                .add("type", "synchronize")
+                .add("playingTrack", message.getTrack()));
     }
 
     /**
@@ -235,12 +320,17 @@ public interface MessageHandler {
      */
     static void pause(GatewaySession session, JsonObject raw) {
         // Check if the session is an Elixir.
-        if (session.getGuildId() == null) return;
+        if (session.getUser() != null) return;
 
         // Apply the track data.
         var message = EncodingUtils.jsonDecode(
                 raw, ElixirMessages.Paused.class);
         session.setPaused(message.isPause());
+
+        // Broadcast the synchronization.
+        ElixirManager.broadcastToAll(session, JObject.c()
+                .add("type", "synchronize")
+                .add("paused", message.isPause()));
     }
 
     /**
@@ -251,11 +341,51 @@ public interface MessageHandler {
      */
     static void loop(GatewaySession session, JsonObject raw) {
         // Check if the session is an Elixir.
-        if (session.getGuildId() == null) return;
+        if (session.getUser() != null) return;
 
         // Apply the track data.
         var message = EncodingUtils.jsonDecode(
                 raw, ElixirMessages.Loop.class);
         session.setLoopMode(message.getLoopMode());
+
+        // Broadcast the synchronization.
+        ElixirManager.broadcastToAll(session, JObject.c()
+                .add("type", "synchronize")
+                .add("loopMode", message.getLoopMode()));
+    }
+
+    /**
+     * Handles the client's request to update the queue.
+     *
+     * @param session The session that sent the message.
+     * @param raw The raw message that was sent.
+     */
+    static void queue(GatewaySession session, JsonObject raw) {
+        // Check if the session is an Elixir.
+        if (session.getUser() != null) return;
+
+        // Apply the track data.
+        var message = EncodingUtils.jsonDecode(
+                raw, ElixirMessages.Queue.class);
+
+        // Broadcast the synchronization.
+        ElixirManager.broadcastToAll(session, JObject.c()
+                .add("type", "synchronize")
+                .add("queue", message.getQueue()));
+    }
+
+    /**
+     * Handles the client's request to update the whole player.
+     *
+     * @param session The session that sent the message.
+     * @param raw The raw message that was sent.
+     */
+    static void synchronize(GatewaySession session, JsonObject raw) {
+        if (session.getUser() != null) {
+            session.getElixirSession().sendMessage(raw);
+        } else {
+            // Forward to all controlling users.
+            ElixirManager.broadcastToAll(session, raw);
+        }
     }
 }

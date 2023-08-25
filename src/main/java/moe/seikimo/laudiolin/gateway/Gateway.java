@@ -47,10 +47,14 @@ public final class Gateway {
         this.put("listen", MessageHandler::listen);
         this.put("player", MessageHandler::player);
         this.put("volume", MessageHandler::volume);
+        this.put("setElixir", MessageHandler::setElixir);
+        this.put("useElixir", MessageHandler::useElixir);
 
         this.put("playing", MessageHandler::playing);
         this.put("paused", MessageHandler::pause);
         this.put("loop", MessageHandler::loop);
+        this.put("queue", MessageHandler::queue);
+        this.put("synchronize", MessageHandler::synchronize);
     }};
 
     /**

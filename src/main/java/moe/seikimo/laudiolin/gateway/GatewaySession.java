@@ -34,6 +34,8 @@ public final class GatewaySession {
 
     private String botId = null;
     private String guildId = null;
+    private boolean usingElixir = false;
+    private GatewaySession elixirSession = null;
 
     // Internal gateway properties.
     private boolean initialized = false;
@@ -46,7 +48,7 @@ public final class GatewaySession {
 
     // The user's current player information.
     private int loopMode = 0; // 0 = None, 1 = Queue, 2 = Track
-    private float volume = 100;
+    private int volume = 100;
     private float trackPosition = 0.0f;
     private boolean paused = true;
     @Nullable private TrackData trackData = null;
@@ -136,6 +138,11 @@ public final class GatewaySession {
         if (list != null) {
             list.remove(this);
         }
+
+        // Check if the user is using an Elixir.
+        if (this.isUsingElixir()) {
+            ElixirManager.removeControllingSession(this);
+        }
     }
 
     /**
@@ -157,6 +164,12 @@ public final class GatewaySession {
     public void listenWith(GatewaySession session) {
         this.setListeningWith(session); // Set our own target.
         session.getListeningAlong().add(this); // Add ourselves to the target's list.
+
+        // Remove references to elixir.
+        this.setElixirSession(null);
+        this.setBotId(null);
+        this.setGuildId(null);
+        this.setUsingElixir(false);
 
         this.syncWith(true); // Perform a sync.
     }
@@ -418,5 +431,12 @@ public final class GatewaySession {
         } catch (Exception ignored) {
             this.getSession().close(); // Close the session.
         }
+    }
+
+    @Override
+    public String toString() {
+        return "%s".formatted(
+                this.getUser().getUserId()
+        );
     }
 }

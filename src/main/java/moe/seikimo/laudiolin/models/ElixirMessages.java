@@ -14,6 +14,12 @@ public interface ElixirMessages {
     }
 
     @Getter
+    final class Queue {
+        // This message is client -> server.
+        private List<TrackData> queue;
+    }
+
+    @Getter
     final class Paused {
         // This message is client -> server.
         private boolean pause;
