@@ -237,6 +237,11 @@ public interface MessageHandler {
                     botIdRaw.getAsString() : guild.getBotId();
             if (botId.isEmpty()) botId = guild.getBotId();
 
+            // Check if the user already has a session.
+            if (session.getElixirSession() != null) {
+                ElixirManager.removeControllingSession(session);
+            }
+
             // Set the selected Elixir.
             session.setGuildId(guildId);
             session.setBotId(botId);
@@ -245,13 +250,13 @@ public interface MessageHandler {
 
             ElixirManager.addControllingSession(session);
         } else {
+            ElixirManager.removeControllingSession(session);
+
             // Unset the selected Elixir.
             session.setGuildId(null);
             session.setBotId(null);
             session.setUsingElixir(false);
             session.setElixirSession(null);
-
-            ElixirManager.removeControllingSession(session);
         }
     }
 
