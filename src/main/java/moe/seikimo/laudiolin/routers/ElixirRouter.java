@@ -7,6 +7,7 @@ import moe.seikimo.laudiolin.gateway.Gateway;
 import moe.seikimo.laudiolin.models.ElixirMessages;
 import moe.seikimo.laudiolin.objects.JObject;
 import moe.seikimo.laudiolin.utils.AccountUtils;
+import moe.seikimo.laudiolin.utils.EncodingUtils;
 
 import static io.javalin.apibuilder.ApiBuilder.*;
 import static moe.seikimo.laudiolin.utils.HttpUtils.SUCCESS;
@@ -66,6 +67,7 @@ public interface ElixirRouter {
         // Set the guilds.
         var body = ctx.bodyAsClass(ElixirMessages.Guilds.class);
         Gateway.getGuilds().put(body.getBotId(), body.getInGuilds());
+        Gateway.getConnected().put(body.getBotId(), body.getConnectedGuilds());
 
         ctx.json(SUCCESS(JObject.c()
                 .add("message", "Guilds updated.")

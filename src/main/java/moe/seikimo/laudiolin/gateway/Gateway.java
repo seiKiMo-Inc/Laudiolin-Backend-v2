@@ -39,6 +39,8 @@ public final class Gateway {
 
     @Getter private static final Map<String, List<String>> guilds
             = new ConcurrentHashMap<>();
+    @Getter private static final Map<String, List<String>> connected
+            = new ConcurrentHashMap<>();
 
     private static final Map<String, MessageHandler> handlers = new HashMap<>() {{
         this.put("initialize", MessageHandler::initialize);

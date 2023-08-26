@@ -139,11 +139,19 @@ public interface AccountUtils {
 
                 // Add a list of all bots.
                 var bots = new JsonArray();
+                var connectedBots = new JsonArray();
                 for (var bot : Gateway.getGuilds().entrySet()) {
+                    // Check if the bot exists in the server.
                     if (bot.getValue().contains(guildId))
                         bots.add(bot.getKey());
                 }
+                for (var bot : Gateway.getConnected().entrySet()) {
+                    // Check if the bot is connected in the server.
+                    if (bot.getValue().contains(guildId))
+                        connectedBots.add(bot.getKey());
+                }
                 guildObj.add("bots", bots);
+                guildObj.add("connected", connectedBots);
                 finalList.add(guildObj);
             }
 
