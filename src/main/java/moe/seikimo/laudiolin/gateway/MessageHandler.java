@@ -146,7 +146,8 @@ public interface MessageHandler {
 
         // Check if the client is listening to a different track.
         var currentTrack = session.getTrackData();
-        if (track != null && !Objects.equals(currentTrack, track)) {
+        var newTrack = track != null && !Objects.equals(currentTrack, track);
+        if (newTrack) {
             session.setStartedListening(System.currentTimeMillis());
 
             // Add the track to the user's recently played.
@@ -187,7 +188,7 @@ public interface MessageHandler {
         session.setPaused(paused);
 
         // Update the user's rich presence.
-        session.updatePresence(session.isPaused());
+        session.updatePresence(newTrack || session.isPaused());
         // Update the listeners of the user.
         session.updateListeners();
         // update the user's online status.
