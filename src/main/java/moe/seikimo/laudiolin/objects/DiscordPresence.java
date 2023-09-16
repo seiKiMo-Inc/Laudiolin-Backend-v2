@@ -113,6 +113,7 @@ public final class DiscordPresence {
         // Prepare the request body.
         var body = JObject.c()
                 .add("userId", user.getUserId())
+                .add("presenceId", "laudiolin")
                 .add("presence", presence)
                 .toString();
 
