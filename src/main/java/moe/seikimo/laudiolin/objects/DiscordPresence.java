@@ -7,9 +7,7 @@ import lombok.Data;
 import lombok.Getter;
 import moe.seikimo.laudiolin.Config;
 import moe.seikimo.laudiolin.models.data.User;
-import moe.seikimo.laudiolin.utils.EncodingUtils;
 import moe.seikimo.laudiolin.utils.HttpUtils;
-import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 
@@ -113,6 +111,7 @@ public final class DiscordPresence {
         // Prepare the request body.
         var body = JObject.c()
                 .add("userId", user.getUserId())
+                .add("presenceId", "laudiolin")
                 .add("presence", presence)
                 .toString();
 

@@ -188,7 +188,7 @@ public interface MessageHandler {
         session.setPaused(paused);
 
         // Update the user's rich presence.
-        session.updatePresence(newTrack || session.isPaused());
+        session.updatePresence(paused || newTrack);
         // Update the listeners of the user.
         session.updateListeners();
         // update the user's online status.
