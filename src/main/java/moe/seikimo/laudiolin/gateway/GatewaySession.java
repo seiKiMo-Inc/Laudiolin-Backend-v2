@@ -56,6 +56,7 @@ public final class GatewaySession {
 
     // The user's social properties.
     private long lastUpdateTime = 0;
+    private boolean updatePresenceNext = false;
 
     private List<GatewaySession> listeningAlong = new CopyOnWriteArrayList<>();
     @Nullable private GatewaySession listeningWith = null;
@@ -217,6 +218,21 @@ public final class GatewaySession {
     }
 
     /**
+     * Queues a presence update.
+     *
+     * @param bypass Should we bypass the update time?
+     */
+    public void queuePresence(boolean bypass) {
+        // Skip if this is bypassed.
+        if (bypass) {
+            this.updatePresence(true);
+            return;
+        }
+
+        this.updatePresenceNext = true;
+    }
+
+    /**
      * Updates the user's rich presence.
      *
      * @param bypass Should we bypass the update time?
@@ -225,6 +241,7 @@ public final class GatewaySession {
         // Check if the client should update.
         if (!bypass && System.currentTimeMillis() -
                 this.getLastUpdateTime() < 10e3) return;
+
         // Update the last update time.
         this.setLastUpdateTime(System.currentTimeMillis());
 
@@ -237,7 +254,7 @@ public final class GatewaySession {
 
         // Check if a track is currently playing.
         var track = this.getTrackData();
-        if (track == null) {
+        if (this.isPaused() || track == null) {
             // Clear the existing presence.
             DiscordPresence.apply(this.getUser(), null);
             return;
@@ -280,11 +297,13 @@ public final class GatewaySession {
                 ));
 
         // Check if the simple rich presence should be used.
-        if (this.getBroadcastPresence() == PresenceMode.LISTENING) {
+        var broadcastType = this.getBroadcastPresence();
+        if (PresenceMode.IS_LISTENING.contains(broadcastType)) {
             presence.type(PresenceType.LISTENING.getValue())
                     .details(track.getTitle());
 
-            if (config.discord.isPresenceDetails()) {
+            if (broadcastType == PresenceMode.SPOTIFY ||
+                    config.discord.isPresenceDetails()) {
                 assets.largeText("Laudiolin");
                 presence.id("spotify:1")
                         .name("Spotify")
@@ -362,6 +381,14 @@ public final class GatewaySession {
 
         // Set the track progress.
         this.setTrackPosition(seek);
+
+        // Check if the presence should be updated.
+        if (this.isUpdatePresenceNext() && seek > 0) {
+            // Clear the state.
+            this.setUpdatePresenceNext(false);
+            // Update the presence.
+            this.updatePresence(false);
+        }
     }
 
     /**

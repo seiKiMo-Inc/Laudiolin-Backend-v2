@@ -143,6 +143,7 @@ public interface MessageHandler {
                 EncodingUtils.jsonDecode(rawTrack, TrackData.class);
         var seek = message.get("seek").getAsFloat();
         var paused = message.get("paused").getAsBoolean();
+        var updatePresence = message.get("update").getAsBoolean();
 
         // Check if the client is listening to a different track.
         var currentTrack = session.getTrackData();
@@ -188,7 +189,9 @@ public interface MessageHandler {
         session.setPaused(paused);
 
         // Update the user's rich presence.
-        session.updatePresence(paused || newTrack);
+        if (updatePresence || newTrack) {
+            session.queuePresence(paused);
+        }
         // Update the listeners of the user.
         session.updateListeners();
         // update the user's online status.
