@@ -143,7 +143,11 @@ public interface MessageHandler {
                 EncodingUtils.jsonDecode(rawTrack, TrackData.class);
         var seek = message.get("seek").getAsFloat();
         var paused = message.get("paused").getAsBoolean();
-        var updatePresence = message.get("update").getAsBoolean();
+
+        var updateRaw = message.get("update");
+        var updatePresence = updateRaw != null &&
+                !updateRaw.isJsonNull() &&
+                updateRaw.getAsBoolean();
 
         // Check if the client is listening to a different track.
         var currentTrack = session.getTrackData();
