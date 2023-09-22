@@ -18,10 +18,14 @@ export async function streamToIterable(stream: ReadableStream<Uint8Array>): Prom
     const reader = stream.getReader();
     const chunks: Uint8Array[] = [];
 
-    while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        chunks.push(value);
+    try {
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            chunks.push(value);
+        }
+    } finally {
+        reader.releaseLock();
     }
 
     return Uint8Array.from(chunks.flatMap(

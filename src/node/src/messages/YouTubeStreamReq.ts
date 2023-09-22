@@ -8,12 +8,6 @@ import { extractId } from "@app/utils";
 import { youtube } from "@app/index";
 import { streamToIterable } from "@app/utils";
 
-import { DownloadOptions } from "youtubei.js";
-
-const downloadOptions: DownloadOptions = {
-    type: "audio", quality: "best", format: "any"
-};
-
 /**
  * Downloads a portion of a YouTube video.
  *
@@ -28,18 +22,19 @@ async function streamInternal(
 ): Promise<{ buffer: Uint8Array, length: number }> {
     // Fetch the data required for streaming.
     const streamingData =
-        await youtube.getStreamingData(id, downloadOptions);
+        await youtube.getStreamingData(id, {
+            type: "audio", quality: "best", format: "any"
+        });
     const length = streamingData.content_length ?? 0;
     if (length == 0) throw new Error("Invalid content length.");
 
     // Download the video.
-    const options = {
-        ...downloadOptions,
-        quality: quality == "High" ? "best" : "bestefficiency",
-        range: { start: min, end: Math.min(max, length) }
-    };
     const stream =
-        await youtube.download(id, options);
+        await youtube.download(id, {
+            type: "audio", format: "any",
+            quality: quality == "High" ? "best" : "bestefficiency",
+            range: { start: min, end: Math.min(max, length) }
+        });
 
     // Convert the stream into a buffer.
     const buffer = await streamToIterable(stream);

@@ -4,12 +4,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start:dev": "ts-node-dev -r tsconfig-paths/register src/index.ts"
+    "start:dev": "ts-node-dev -r tsconfig-paths/register src/index.ts",
+    "build": "ncc build src/index.ts -m"
   },
   "dependencies": {
     "ws": "^8.13.0",
     "tslog": "^4.8.2",
-    "youtubei.js": "^5.8.0",
+    "youtubei.js": "^6.4.0",
     "fluent-ffmpeg": "^2.1.2",
     "@protobuf-ts/runtime": "^2.9.1"
   },
