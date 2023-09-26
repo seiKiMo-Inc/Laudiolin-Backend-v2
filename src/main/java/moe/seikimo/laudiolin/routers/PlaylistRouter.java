@@ -44,7 +44,7 @@ public interface PlaylistRouter {
 
         // Check the body data.
         if (!Objects.equals(ctx.contentType(), "application/json")) {
-            ctx.status(400).json(INVALID_ARGUMENTS());
+            ctx.status(400).json(INVALID_ARGUMENTS("Body is not JSON."));
             return;
         }
 
@@ -54,8 +54,9 @@ public interface PlaylistRouter {
             if (playlist == null) throw new IllegalArgumentException("Invalid body data.");
 
             PlaylistRouter.addPlaylist(ctx, user, playlist);
-        } catch (Exception ignored) {
-            ctx.status(400).json(INVALID_ARGUMENTS());
+        } catch (Exception exception) {
+            Laudiolin.getLogger().error("Unable to save playlist.", exception);
+            ctx.status(500).json(INTERNAL_ERROR());
         }
     }
 
@@ -77,7 +78,7 @@ public interface PlaylistRouter {
 
             // Validate parameters.
             if (urlRaw == null || urlRaw.isJsonNull()) {
-                ctx.status(400).json(INVALID_ARGUMENTS());
+                ctx.status(400).json(INVALID_ARGUMENTS("No URL provided."));
                 return;
             }
             var url = urlRaw.getAsString();
@@ -85,7 +86,7 @@ public interface PlaylistRouter {
             // Identify the engine to use.
             var source = Source.identify(url);
             if (source == Source.UNKNOWN || source == Source.ALL) {
-                ctx.status(400).json(INVALID_ARGUMENTS());
+                ctx.status(400).json(INVALID_ARGUMENTS("Source is invalid."));
                 return;
             }
 
@@ -99,13 +100,14 @@ public interface PlaylistRouter {
 
             // Check if the playlist is null.
             if (playlist == null) {
-                ctx.status(400).json(INVALID_ARGUMENTS());
+                ctx.status(400).json(INVALID_ARGUMENTS("Playlist data is invalid."));
                 return;
             }
 
             PlaylistRouter.addPlaylist(ctx, user, playlist);
-        } catch (Exception ignored) {
-            ctx.status(400).json(INVALID_ARGUMENTS());
+        } catch (Exception exception) {
+            Laudiolin.getLogger().error("Unable to save playlist.", exception);
+            ctx.status(500).json(INTERNAL_ERROR());
         }
     }
 
@@ -121,7 +123,7 @@ public interface PlaylistRouter {
 
             // Validate arguments.
             if (id.isEmpty()) {
-                ctx.status(400).json(INVALID_ARGUMENTS());
+                ctx.status(400).json(INVALID_ARGUMENTS("No ID provided."));
                 return;
             }
 
@@ -147,8 +149,9 @@ public interface PlaylistRouter {
 
             // Return the playlist.
             ctx.status(301).json(playlist);
-        } catch (Exception ignored) {
-            ctx.status(400).json(INVALID_ARGUMENTS());
+        } catch (Exception exception) {
+            Laudiolin.getLogger().error("Unable to save playlist.", exception);
+            ctx.status(500).json(INTERNAL_ERROR());
         }
     }
 
@@ -169,7 +172,7 @@ public interface PlaylistRouter {
 
             // Validate parameters.
             if (id.isEmpty() || type == null || type.isEmpty()) {
-                ctx.status(400).json(INVALID_ARGUMENTS());
+                ctx.status(400).json(INVALID_ARGUMENTS("ID or action is invalid."));
                 return;
             }
 
@@ -190,14 +193,14 @@ public interface PlaylistRouter {
             var body = ctx.bodyAsClass(JsonObject.class);
             switch (type) {
                 default -> {
-                    ctx.status(400).json(INVALID_ARGUMENTS());
+                    ctx.status(400).json(INVALID_ARGUMENTS("Invalid action provided."));
                     return;
                 }
                 case "rename" -> {
                     // Validate the body.
                     var nameRaw = body.get("name");
                     if (nameRaw == null || nameRaw.isJsonNull()) {
-                        ctx.status(400).json(INVALID_ARGUMENTS());
+                        ctx.status(400).json(INVALID_ARGUMENTS("Name is invalid."));
                         return;
                     }
 
@@ -208,7 +211,7 @@ public interface PlaylistRouter {
                     // Validate the body.
                     var descriptionRaw = body.get("description");
                     if (descriptionRaw == null || descriptionRaw.isJsonNull()) {
-                        ctx.status(400).json(INVALID_ARGUMENTS());
+                        ctx.status(400).json(INVALID_ARGUMENTS("Description is invalid."));
                         return;
                     }
 
@@ -219,7 +222,7 @@ public interface PlaylistRouter {
                     // Validate the body.
                     var iconRaw = body.get("icon");
                     if (iconRaw == null || iconRaw.isJsonNull()) {
-                        ctx.status(400).json(INVALID_ARGUMENTS());
+                        ctx.status(400).json(INVALID_ARGUMENTS("Icon is invalid."));
                         return;
                     }
 
@@ -230,7 +233,7 @@ public interface PlaylistRouter {
                     // Validate the body.
                     var privacyRaw = body.get("privacy");
                     if (privacyRaw == null || privacyRaw.isJsonNull()) {
-                        ctx.status(400).json(INVALID_ARGUMENTS());
+                        ctx.status(400).json(INVALID_ARGUMENTS("Privacy is invalid"));
                         return;
                     }
 
@@ -241,11 +244,11 @@ public interface PlaylistRouter {
                     // Parse the body into a TrackData object.
                     var trackData = ctx.bodyAsClass(TrackData.class);
                     if (trackData == null) {
-                        ctx.status(400).json(INVALID_ARGUMENTS());
+                        ctx.status(400).json(INVALID_ARGUMENTS("Track data failed to parse."));
                         return;
                     }
                     if (!TrackData.valid(trackData)) {
-                        ctx.status(400).json(INVALID_ARGUMENTS());
+                        ctx.status(400).json(INVALID_ARGUMENTS("Track data is invalid."));
                         return;
                     }
 
@@ -256,7 +259,7 @@ public interface PlaylistRouter {
                     // Validate the body.
                     var indexRaw = body.get("index");
                     if (indexRaw == null || indexRaw.isJsonNull()) {
-                        ctx.status(400).json(INVALID_ARGUMENTS());
+                        ctx.status(400).json(INVALID_ARGUMENTS("Index is invalid."));
                         return;
                     }
 
@@ -268,7 +271,7 @@ public interface PlaylistRouter {
                     var tracks = new ArrayList<TrackData>();
                     var tracksRaw = body.get("tracks");
                     if (tracksRaw == null || !tracksRaw.isJsonArray()) {
-                        ctx.status(400).json(INVALID_ARGUMENTS());
+                        ctx.status(400).json(INVALID_ARGUMENTS("Tracks are invalid."));
                         return;
                     }
 
@@ -281,7 +284,7 @@ public interface PlaylistRouter {
                                 TrackData.class
                         );
                         if (!TrackData.valid(trackData)) {
-                            ctx.status(400).json(INVALID_ARGUMENTS());
+                            ctx.status(400).json(INVALID_ARGUMENTS("A provided track was invalid."));
                             return;
                         }
                         tracks.add(trackData);
@@ -302,7 +305,7 @@ public interface PlaylistRouter {
 
             // Validate the playlist data.
             if (!Playlist.valid(playlist)) {
-                ctx.status(400).json(INVALID_ARGUMENTS());
+                ctx.status(400).json(INVALID_ARGUMENTS("Playlist is not valid."));
                 return;
             }
 
@@ -310,11 +313,19 @@ public interface PlaylistRouter {
             playlist.save();
             // Return the playlist.
             ctx.status(200).json(playlist);
-        } catch (Exception ignored) {
-            ctx.status(400).json(INVALID_ARGUMENTS());
+        } catch (IllegalArgumentException invalid) {
+            ctx.status(400).json(INVALID_ARGUMENTS(invalid.getMessage()));
+        } catch (Exception exception) {
+            Laudiolin.getLogger().error("Unable to save playlist.", exception);
+            ctx.status(500).json(INTERNAL_ERROR());
         }
     }
 
+    /**
+     * Deletes a playlist.
+     *
+     * @param ctx The Javalin context.
+     */
     static void deletePlaylist(Context ctx) {
         try {
             // Get the user.
@@ -326,7 +337,7 @@ public interface PlaylistRouter {
 
             // Validate parameters.
             if (id.isEmpty()) {
-                ctx.status(400).json(INVALID_ARGUMENTS());
+                ctx.status(400).json(INVALID_ARGUMENTS("No ID provided."));
                 return;
             }
 
@@ -351,8 +362,9 @@ public interface PlaylistRouter {
 
             // Return the playlist.
             ctx.status(200).json(SUCCESS());
-        } catch (Exception ignored) {
-            ctx.status(400).json(INVALID_ARGUMENTS());
+        } catch (Exception exception) {
+            Laudiolin.getLogger().error("Unable to save playlist.", exception);
+            ctx.status(500).json(INTERNAL_ERROR());
         }
     }
 
@@ -371,7 +383,7 @@ public interface PlaylistRouter {
 
         // Validate the playlist data.
         if (!Playlist.valid(playlist)) {
-            ctx.status(400).json(INVALID_ARGUMENTS());
+            ctx.status(400).json(INVALID_ARGUMENTS("Playlist is invalid."));
             return;
         }
 

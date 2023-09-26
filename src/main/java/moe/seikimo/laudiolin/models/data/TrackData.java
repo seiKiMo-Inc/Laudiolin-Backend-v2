@@ -2,11 +2,11 @@ package moe.seikimo.laudiolin.models.data;
 
 import com.google.gson.JsonObject;
 import dev.morphia.annotations.Entity;
-import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import moe.seikimo.laudiolin.Messages;
 import moe.seikimo.laudiolin.objects.JObject;
+import moe.seikimo.laudiolin.utils.Assertions;
 import moe.seikimo.laudiolin.utils.EncodingUtils;
 import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
@@ -107,17 +107,23 @@ public class TrackData {
      * Validates a {@link TrackData} object.
      *
      * @param track The track to validate.
-     * @return Whether the track is valid.
      */
     public static boolean valid(TrackData track) {
-        return track != null &&
-                !track.getId().isEmpty() &&
-                !track.getTitle().isEmpty() &&
-                !track.getArtist().isEmpty() &&
-                !track.getIcon().isEmpty() &&
-                !track.getUrl().isEmpty() &&
-                track.getDuration() > 0 &&
-                EncodingUtils.isValidUrl(track.getUrl()) &&
-                EncodingUtils.isValidUrl(track.getIcon());
+        Assertions.check(track != null, "Track cannot be null.");
+
+        // Set the artist.
+        if (track.getArtist().isEmpty()) {
+            track.setArtist("Unknown");
+        }
+
+        Assertions.check(!track.getId().isEmpty(), "Track ID cannot be empty.");
+        Assertions.check(!track.getTitle().isEmpty(), "Track title cannot be empty.");
+        Assertions.check(!track.getIcon().isEmpty(), "Track icon cannot be empty.");
+        Assertions.check(!track.getUrl().isEmpty(), "Track URL cannot be empty.");
+        Assertions.check(track.getDuration() > 0, "Track duration must be positive.");
+        Assertions.check(EncodingUtils.isValidUrl(track.getUrl()), "Track URL is invalid.");
+        Assertions.check(EncodingUtils.isValidUrl(track.getIcon()), "Track icon is invalid.");
+
+        return true;
     }
 }

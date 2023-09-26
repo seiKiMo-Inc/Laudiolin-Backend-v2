@@ -203,6 +203,19 @@ public interface HttpUtils {
     }
 
     /**
+     * @param reason The reason for the error.
+     * @return A 400 error.
+     */
+    static JsonObject INVALID_ARGUMENTS(String reason) {
+        return JObject.c()
+                .add("timestamp", System.currentTimeMillis())
+                .add("code", 400)
+                .add("message", "Invalid arguments were provided.")
+                .add("reason", reason)
+                .gson();
+    }
+
+    /**
      * @return A 400 error.
      */
     static JsonObject INVALID_TOKEN() {

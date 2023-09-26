@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 import moe.seikimo.laudiolin.interfaces.DatabaseObject;
 import moe.seikimo.laudiolin.objects.JObject;
+import moe.seikimo.laudiolin.utils.Assertions;
 import moe.seikimo.laudiolin.utils.DatabaseUtils;
 import moe.seikimo.laudiolin.utils.EncodingUtils;
 import org.bson.Document;
@@ -38,16 +39,20 @@ public class Playlist implements DatabaseObject<Playlist> {
      */
     public static boolean valid(Playlist playlist) {
         // Check playlist basics.
-        var basic = playlist != null &&
-                !playlist.getId().isEmpty() &&
-                !playlist.getOwner().isEmpty() &&
-                !playlist.getName().isEmpty() &&
-                !playlist.getIcon().isEmpty();
-        if (!basic) return false;
+        Assertions.check(playlist != null, "Playlist cannot be null.");
+        Assertions.check(!playlist.getId().isEmpty(), "Playlist ID cannot be empty.");
+        Assertions.check(!playlist.getOwner().isEmpty(), "Playlist owner cannot be empty.");
+        Assertions.check(!playlist.getName().isEmpty(), "Playlist name cannot be empty.");
+        Assertions.check(!playlist.getIcon().isEmpty(), "Playlist icon cannot be empty.");
 
         // Validate individual tracks.
-        for (var track : playlist.getTracks()) {
-            if (!TrackData.valid(track)) return false;
+        for (var i = 0; i < playlist.getTracks().size(); i++) {
+            var track = playlist.getTracks().get(i);
+            try {
+                TrackData.valid(track);
+            } catch (IllegalArgumentException invalid) {
+                throw new IllegalArgumentException("Invalid track at index " + i + "; " + invalid.getMessage());
+            }
         }
 
         return EncodingUtils.isValidUrl(playlist.getIcon());

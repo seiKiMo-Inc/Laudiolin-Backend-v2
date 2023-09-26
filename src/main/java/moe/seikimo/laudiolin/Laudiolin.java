@@ -37,6 +37,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 public final class Laudiolin {
     private static final long startTime = System.currentTimeMillis();
+    private static boolean started = false;
 
     static {
         // Set logback configuration file.
@@ -165,11 +166,26 @@ public final class Laudiolin {
             // Log the startup time.
             logger.info("Laudiolin backend started in {}ms.",
                     System.currentTimeMillis() - startTime);
+            Laudiolin.started = true;
         } catch (ConnectException | URISyntaxException ignored) {
             logger.error("Unable to find the Node pipe.");
         } catch (IOException exception) {
             logger.error("Failed to start Laudiolin.", exception);
         }
+    }
+
+    /**
+     * Ensures the application is online.
+     */
+    public static void ensureAvailable() {
+        if (Laudiolin.started) return;
+
+        // Start the application.
+        Laudiolin.main(new String[] {
+                "--pipe=laudiolin-dev",
+                "--port=19132",
+                "--no-node"
+        });
     }
 
     /**
