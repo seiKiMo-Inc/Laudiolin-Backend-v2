@@ -71,7 +71,7 @@ public final class Laudiolin {
                 // Parse the startup arguments.
                 Laudiolin.parseArguments(args);
                 // Load the configuration.
-                Config.load();
+                Config.load(arguments.getOrDefault("config", "config.json"));
 
                 logger.info("Configuration loaded.");
             }

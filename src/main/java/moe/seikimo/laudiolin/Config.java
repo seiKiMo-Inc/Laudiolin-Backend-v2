@@ -24,10 +24,12 @@ public final class Config {
 
     /**
      * Loads the configuration from a file.
+     *
+     * @param filePath The path to the configuration file.
      */
     @SneakyThrows
-    public static void load() {
-        var configFile = new File("config.json");
+    public static void load(String filePath) {
+        var configFile = new File(filePath);
 
         if (!configFile.exists()) {
             // Save this configuration.
