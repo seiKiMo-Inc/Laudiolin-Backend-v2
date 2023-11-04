@@ -44,7 +44,8 @@ public interface ProxyRouter {
                 }
                 case "spot" -> HttpUtils.makeRequest("https://i.scdn.co/image/" + url);
                 case "yt" -> HttpUtils.makeRequest("https://i.ytimg.com/vi/" + url + "/hq720.jpg");
-            }).contentType(ContentType.IMAGE_JPEG);
+            }).contentType(ContentType.IMAGE_JPEG)
+                    .header("Cache-Control", "public, max-age=604800, immutable");
         } catch (Exception ignored) {
             ctx.status(400).json(INVALID_ARGUMENTS());
         }

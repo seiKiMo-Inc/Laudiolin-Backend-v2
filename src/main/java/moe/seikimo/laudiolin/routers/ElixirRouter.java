@@ -7,7 +7,6 @@ import moe.seikimo.laudiolin.gateway.Gateway;
 import moe.seikimo.laudiolin.models.ElixirMessages;
 import moe.seikimo.laudiolin.objects.JObject;
 import moe.seikimo.laudiolin.utils.AccountUtils;
-import moe.seikimo.laudiolin.utils.EncodingUtils;
 
 import static io.javalin.apibuilder.ApiBuilder.*;
 import static moe.seikimo.laudiolin.utils.HttpUtils.SUCCESS;
