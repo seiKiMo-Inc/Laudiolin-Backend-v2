@@ -147,7 +147,7 @@ public final class Gateway {
             // Attempt to handle the message.
             var handler = Gateway.handlers.get(messageType);
             if (handler == null) {
-                ctx.send(GATEWAY_UNKNOWN_MESSAGE());
+                ctx.send(GATEWAY_UNKNOWN_MESSAGE(content));
                 ctx.closeSession();
 
                 logger.debug("Unknown gateway message received from {}: {}",
@@ -156,7 +156,7 @@ public final class Gateway {
                 handler.handle(session, content);
             } catch (Exception exception) {
                 // This is thrown when a JSON parsing error occurs.
-                ctx.send(GATEWAY_UNKNOWN_MESSAGE());
+                ctx.send(GATEWAY_UNKNOWN_MESSAGE(content));
                 ctx.closeSession();
 
                 logger.debug("Encountered error while handling message {} from {}: {}.",
@@ -267,11 +267,12 @@ public final class Gateway {
     }
 
     /** This message states that the client sent an invalid message. */
-    public static JsonObject GATEWAY_UNKNOWN_MESSAGE() {
+    public static JsonObject GATEWAY_UNKNOWN_MESSAGE(JsonObject message) {
         return JObject.c()
                 .add("type", "")
                 .add("code", 3)
                 .add("message", "Invalid message received.")
+                .add("data", message)
                 .add("timestamp", System.currentTimeMillis())
                 .gson();
     }

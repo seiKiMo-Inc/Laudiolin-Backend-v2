@@ -144,11 +144,6 @@ public interface MessageHandler {
         var seek = message.get("seek").getAsFloat();
         var paused = message.get("paused").getAsBoolean();
 
-        var updateRaw = message.get("update");
-        var updatePresence = updateRaw != null &&
-                !updateRaw.isJsonNull() &&
-                updateRaw.getAsBoolean();
-
         // Check if the client is listening to a different track.
         var currentTrack = session.getTrackData();
         var newTrack = track != null && !Objects.equals(currentTrack, track);
@@ -159,29 +154,31 @@ public interface MessageHandler {
             var user = session.getUser();
             var recents = user.getRecentlyPlayed();
 
-            var mostRecent = recents.get(0);
-            if (!mostRecent.equals(track)) {
-                // Add the track to the user's recently played.
-                if (recents.size() >= 10)
-                    recents.remove(9);
-                recents.add(0, track);
+            if (!recents.isEmpty()) {
+                var mostRecent = recents.get(0);
+                if (!mostRecent.equals(track)) {
+                    // Add the track to the user's recently played.
+                    if (recents.size() >= 10)
+                        recents.remove(9);
+                    recents.add(0, track);
 
-                // Remove any duplicates.
-                List<TrackData> newList = new ArrayList<>();
-                for (var recentTrack : recents) {
-                    if (!newList.contains(recentTrack))
-                        newList.add(recentTrack);
+                    // Remove any duplicates.
+                    List<TrackData> newList = new ArrayList<>();
+                    for (var recentTrack : recents) {
+                        if (!newList.contains(recentTrack))
+                            newList.add(recentTrack);
+                    }
+
+                    // Apply and save the changes.
+                    user.setRecentlyPlayed(newList);
+                    user.save();
+
+                    // Send a gateway message.
+                    session.sendMessage(JObject.c()
+                            .add("type", "recents")
+                            .add("recents", newList)
+                            .add("timestamp", System.currentTimeMillis()));
                 }
-
-                // Apply and save the changes.
-                user.setRecentlyPlayed(newList);
-                user.save();
-
-                // Send a gateway message.
-                session.sendMessage(JObject.c()
-                        .add("type", "recents")
-                        .add("recents", newList)
-                        .add("timestamp", System.currentTimeMillis()));
             }
         }
 
@@ -192,10 +189,6 @@ public interface MessageHandler {
         session.setTrackPosition(seek);
         session.setPaused(paused);
 
-        // Update the user's rich presence.
-        if (updatePresence || newTrack) {
-            session.queuePresence(paused);
-        }
         // Update the listeners of the user.
         session.updateListeners();
         // update the user's online status.

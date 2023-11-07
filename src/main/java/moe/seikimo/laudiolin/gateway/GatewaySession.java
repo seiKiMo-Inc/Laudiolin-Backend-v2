@@ -3,13 +3,11 @@ package moe.seikimo.laudiolin.gateway;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import lombok.Data;
-import moe.seikimo.laudiolin.Config;
 import moe.seikimo.laudiolin.models.OfflineUser;
 import moe.seikimo.laudiolin.models.OnlineUser;
 import moe.seikimo.laudiolin.models.data.TrackData;
 import moe.seikimo.laudiolin.models.data.User;
 import moe.seikimo.laudiolin.objects.DiscordPresence;
-import moe.seikimo.laudiolin.objects.DiscordPresence.*;
 import moe.seikimo.laudiolin.objects.JObject;
 import moe.seikimo.laudiolin.objects.user.PresenceMode;
 import moe.seikimo.laudiolin.objects.user.SocialStatus;
@@ -218,109 +216,6 @@ public final class GatewaySession {
     }
 
     /**
-     * Queues a presence update.
-     *
-     * @param bypass Should we bypass the update time?
-     */
-    public void queuePresence(boolean bypass) {
-        // Skip if this is bypassed.
-        if (bypass) {
-            this.updatePresence(true);
-            return;
-        }
-
-        this.updatePresenceNext = true;
-    }
-
-    /**
-     * Updates the user's rich presence.
-     *
-     * @param bypass Should we bypass the update time?
-     */
-    public void updatePresence(boolean bypass) {
-        // Check if the client should update.
-        if (!bypass && System.currentTimeMillis() -
-                this.getLastUpdateTime() < 10e3) return;
-
-        // Update the last update time.
-        this.setLastUpdateTime(System.currentTimeMillis());
-
-        // Check the presence mode.
-        if (this.getBroadcastPresence() == PresenceMode.NONE) {
-            // Clear the existing presence.
-            DiscordPresence.apply(this.getUser(), null);
-            return;
-        }
-
-        // Check if a track is currently playing.
-        var track = this.getTrackData();
-        if (this.isPaused() || track == null) {
-            // Clear the existing presence.
-            DiscordPresence.apply(this.getUser(), null);
-            return;
-        }
-
-        // Get the start listening time.
-        var started = this.getStartedListening();
-        if (started == null) started = System.currentTimeMillis();
-
-        // Build the presence.
-        var config = Config.get();
-        var clientId = config.discord.getClientId();
-        var webTarget = config.getWebTarget();
-
-        var assets = Assets.builder()
-                .largeImage(track.getIcon())
-                .largeText(track.getTitle())
-                .smallImage(config.discord.getLogoHash())
-                .smallText("Laudiolin");
-        var presence = DiscordPresence.builder()
-                .platform(Platform.DESKTOP.getValue())
-                .type(PresenceType.PLAYING.getValue())
-                .id("laudiolin").name("Laudiolin")
-                .applicationId(clientId)
-                .details("Listening to " + track.getTitle())
-                .state(track.getArtist())
-                .timestamps(Timestamps.builder()
-                        .start(started)
-                        .end((long) (started + (track.getDuration() * 1000f)))
-                        .build())
-                .buttons(List.of(
-                        Button.builder()
-                                .label("Play on Laudiolin")
-                                .url(webTarget + "/track/" + track.getId())
-                                .build(),
-                        Button.builder()
-                                .label("Listen Along")
-                                .url(webTarget + "/listen/" + this.getUser().getUserId())
-                                .build()
-                ));
-
-        // Check if the simple rich presence should be used.
-        var broadcastType = this.getBroadcastPresence();
-        if (PresenceMode.IS_LISTENING.contains(broadcastType)) {
-            presence.type(PresenceType.LISTENING.getValue())
-                    .details(track.getTitle());
-
-            if (broadcastType == PresenceMode.SPOTIFY ||
-                    config.discord.isPresenceDetails()) {
-                assets.largeText("Laudiolin");
-                presence.id("spotify:1")
-                        .name("Spotify")
-                        .sessionId("4efa609dfa405bb70c0da334220d4a3f")
-                        .party(Party.builder()
-                                .id("spotify:852697865012117544")
-                                .build())
-                        .flags(48);
-            }
-        }
-
-        // Set the presence.
-        presence.assets(assets.build())
-                .build().apply(this.getUser());
-    }
-
-    /**
      * Syncs listeners with the client.
      */
     public void updateListeners() {
@@ -381,14 +276,6 @@ public final class GatewaySession {
 
         // Set the track progress.
         this.setTrackPosition(seek);
-
-        // Check if the presence should be updated.
-        if (this.isUpdatePresenceNext() && seek > 0) {
-            // Clear the state.
-            this.setUpdatePresenceNext(false);
-            // Update the presence.
-            this.updatePresence(false);
-        }
     }
 
     /**

@@ -249,6 +249,19 @@ public interface HttpUtils {
     }
 
     /**
+     * @param message The exception message.
+     * @return A 500 error.
+     */
+    static JsonObject INTERNAL_ERROR(String message) {
+        return JObject.c()
+                .add("timestamp", System.currentTimeMillis())
+                .add("code", 500)
+                .add("message", "Internal server error.")
+                .add("reason", message)
+                .gson();
+    }
+
+    /**
      * @return A 429 error.
      */
     static JsonObject RATE_LIMITED() {

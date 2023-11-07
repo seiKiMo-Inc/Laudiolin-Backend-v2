@@ -89,16 +89,6 @@ public final class DiscordPresence {
     }
 
     /**
-     * Applies this rich presence to a user.
-     *
-     * @see #apply(User, DiscordPresence)
-     * @param user The user to apply the rich presence to.
-     */
-    public void apply(User user) {
-        DiscordPresence.apply(user, this);
-    }
-
-    /**
      * Sets a user's rich presence.
      *
      * @param user The user to set the rich presence for.
