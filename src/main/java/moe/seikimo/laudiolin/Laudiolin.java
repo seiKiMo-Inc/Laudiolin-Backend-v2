@@ -11,6 +11,7 @@ import io.javalin.json.JavalinGson;
 import io.javalin.plugin.bundled.CorsPluginConfig;
 import lombok.Getter;
 import moe.seikimo.laudiolin.gateway.Gateway;
+import moe.seikimo.laudiolin.gateway.PeerSignaling;
 import moe.seikimo.laudiolin.objects.Constants;
 import moe.seikimo.laudiolin.routers.*;
 import moe.seikimo.laudiolin.utils.EncodingUtils;
@@ -156,6 +157,7 @@ public final class Laudiolin {
                 PlaylistRouter.configure(javalin);
 
                 Gateway.configure(javalin);
+                PeerSignaling.configure(javalin);
 
                 // Start the Javalin instance.
                 javalin.start(Config.get().getPort());
