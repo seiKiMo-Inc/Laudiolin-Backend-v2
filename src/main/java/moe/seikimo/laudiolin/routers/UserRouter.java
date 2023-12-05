@@ -89,8 +89,8 @@ public interface UserRouter {
                     .contentType(ContentType.TEXT_HTML)
                     .result(AUTHORIZE_SCRIPT.get()
                             .replace("[[TOKEN]]", token));
-        } catch (Exception ignored) {
-            ctx.status(400).json(INVALID_ARGUMENTS());
+        } catch (Exception exception) {
+            ctx.status(400).json(INVALID_ARGUMENTS(exception.getMessage()));
         }
     }
 
