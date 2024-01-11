@@ -10,7 +10,7 @@
   "dependencies": {
     "ws": "^8.13.0",
     "tslog": "^4.8.2",
-    "youtubei.js": "^6.4.0",
+    "youtubei.js": "^8.2.0",
     "fluent-ffmpeg": "^2.1.2",
     "@protobuf-ts/runtime": "^2.9.1"
   },
