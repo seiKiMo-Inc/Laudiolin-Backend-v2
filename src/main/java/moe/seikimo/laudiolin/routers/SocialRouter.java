@@ -2,7 +2,7 @@ package moe.seikimo.laudiolin.routers;
 
 import io.javalin.Javalin;
 import io.javalin.http.Context;
-import moe.seikimo.laudiolin.TrackUtils;
+import moe.seikimo.laudiolin.utils.TrackUtils;
 import moe.seikimo.laudiolin.gateway.Gateway;
 import moe.seikimo.laudiolin.models.MinifiedPresence;
 import moe.seikimo.laudiolin.models.OfflineUser;

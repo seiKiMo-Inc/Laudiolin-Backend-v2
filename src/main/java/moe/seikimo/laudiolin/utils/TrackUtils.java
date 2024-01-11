@@ -1,11 +1,12 @@
-package moe.seikimo.laudiolin;
+package moe.seikimo.laudiolin.utils;
 
+import moe.seikimo.laudiolin.Config;
+import moe.seikimo.laudiolin.Laudiolin;
 import moe.seikimo.laudiolin.enums.Source;
 import moe.seikimo.laudiolin.models.data.TrackData;
 import moe.seikimo.laudiolin.models.data.User;
 import moe.seikimo.laudiolin.objects.DiscordPresence;
 import moe.seikimo.laudiolin.objects.user.PresenceMode;
-import moe.seikimo.laudiolin.utils.SpotifyUtils;
 
 import java.util.List;
 
