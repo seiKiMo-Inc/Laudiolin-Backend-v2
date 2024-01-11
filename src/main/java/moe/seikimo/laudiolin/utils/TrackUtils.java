@@ -29,6 +29,19 @@ public interface TrackUtils {
     }
 
     /**
+     * Cleans up the artist name.
+     *
+     * @param artist The artist name.
+     * @return The cleaned up artist name.
+     */
+    static String parseArtist(String artist) {
+        if (artist.trim().isEmpty()) return "Unknown Artist";
+        if (artist.contains("- Topic")) artist = artist.replace("- Topic", "");
+
+        return artist; // Return the artist after parsing.
+    }
+
+    /**
      * Creates a Discord rich presence from a track data.
      *
      * @param track The track data.
@@ -57,7 +70,7 @@ public interface TrackUtils {
                 .id("laudiolin").name("Laudiolin")
                 .applicationId(clientId)
                 .details("Listening to " + track.getTitle())
-                .state(track.getArtist())
+                .state(TrackUtils.parseArtist(track.getArtist()))
                 .timestamps(DiscordPresence.Timestamps.builder()
                         .start(started)
                         .end(shouldEnd)

@@ -2,12 +2,14 @@ package moe.seikimo.laudiolin.models.data;
 
 import com.google.gson.JsonObject;
 import dev.morphia.annotations.Entity;
+import dev.morphia.annotations.PreLoad;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import moe.seikimo.laudiolin.Messages;
 import moe.seikimo.laudiolin.objects.JObject;
 import moe.seikimo.laudiolin.utils.Assertions;
 import moe.seikimo.laudiolin.utils.EncodingUtils;
+import moe.seikimo.laudiolin.utils.TrackUtils;
 import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,6 +27,33 @@ public class TrackData {
 
     public TrackData() {
         // Empty constructor for Morphia.
+    }
+
+    @PreLoad
+    public void onLoad(Document document) {
+        var id = document.getString("id");
+
+        // Check if the icon URL should be morphed.
+        var icon = document.getString("icon");
+        if (icon.contains("localhost:")) {
+            // Determine the icon from the ID.
+            var track = TrackUtils.lookup(id);
+            icon = track.getIcon();
+        }
+
+        // Check if the source URL should be morphed.
+        var url = document.getString("url");
+        if (url.contains("/stream") || url.contains("?id=") || url.contains("&quality=")) {
+            // Determine the source from the ID.
+            var track = TrackUtils.lookup(id);
+            url = track.getUrl();
+        }
+
+        // Set the values.
+        document.put("icon", icon);
+        document.put("url", url);
+        document.put("artist", TrackUtils.parseArtist(
+                document.getString("artist")));
     }
 
     @Override
