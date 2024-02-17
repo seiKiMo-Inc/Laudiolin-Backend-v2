@@ -84,7 +84,9 @@ public interface SearchRouter {
                     yield TrackData.toTrack(track);
                 }
                 case SPOTIFY -> {
-                    var track = SpotifyUtils.searchIsrc(id);
+                    var track = id.length() == 22 ?
+                            SpotifyUtils.searchId(id) :
+                            SpotifyUtils.searchIsrc(id);
                     if (track == null) yield null;
 
                     yield SpotifyUtils.toTrackData(track);
