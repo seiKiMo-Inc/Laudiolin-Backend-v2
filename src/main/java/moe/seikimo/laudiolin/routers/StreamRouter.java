@@ -110,8 +110,8 @@ public interface StreamRouter {
                     .status(200)
                     .contentType(ContentType.AUDIO_MPEG)
                     .header("Content-Length", String.valueOf(data.length))
-                    .result(data)
-                    .status(HttpStatus.OK);
+                    .header("Cache-Control", "public, max-age=86400")
+                    .result(data);
         } catch (Exception exception) {
             ctx.status(500);
             Laudiolin.getLogger().warn("Failed to download video.", exception);

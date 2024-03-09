@@ -53,7 +53,10 @@ public interface SearchRouter {
         if (results == null) {
             ctx.status(404).json(NO_RESULTS());
         } else {
-            ctx.status(301).json(results);
+            ctx
+                    .status(301)
+                    .header("Cache-Control", "public, max-age=86400")
+                    .json(results);
         }
     }
 
