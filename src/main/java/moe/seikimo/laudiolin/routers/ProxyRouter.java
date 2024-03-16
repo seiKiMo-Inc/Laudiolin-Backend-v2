@@ -76,18 +76,21 @@ public interface ProxyRouter {
                 return;
             }
 
-            ctx.status(200).result(switch (from) {
-                default -> throw new IllegalArgumentException();
-                case "cart" -> {
-                    // Adjust the URL.
-                    url = url.substring(0, url.indexOf("=w"));
-                    url += "=w512-h512-l90-rj?from=cart";
-                    yield HttpUtils.makeRequest("https://lh3.googleusercontent.com/" + url);
-                }
-                case "spot" -> HttpUtils.makeRequest("https://i.scdn.co/image/" + url);
-                case "yt" -> HttpUtils.makeRequest("https://i.ytimg.com/vi/" + url + "/hq720.jpg");
-            }).contentType(ContentType.IMAGE_JPEG)
-                    .header("Cache-Control", "public, max-age=604800, immutable");
+            ctx
+                    .status(200)
+                    .contentType(ContentType.IMAGE_JPEG)
+                    .header("Cache-Control", "public, max-age=604800, immutable")
+                    .result(switch (from) {
+                        default -> throw new IllegalArgumentException();
+                        case "cart" -> {
+                            // Adjust the URL.
+                            url = url.substring(0, url.indexOf("=w"));
+                            url += "=w512-h512-l90-rj?from=cart";
+                            yield HttpUtils.makeRequest("https://lh3.googleusercontent.com/" + url);
+                        }
+                        case "spot" -> HttpUtils.makeRequest("https://i.scdn.co/image/" + url);
+                        case "yt" -> HttpUtils.makeRequest("https://i.ytimg.com/vi/" + url + "/hq720.jpg");
+                    });
         } catch (Exception ignored) {
             ctx.status(400).json(INVALID_ARGUMENTS());
         }

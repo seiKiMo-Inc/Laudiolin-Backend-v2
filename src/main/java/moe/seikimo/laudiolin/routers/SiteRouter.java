@@ -9,6 +9,8 @@ import moe.seikimo.laudiolin.Laudiolin;
 import moe.seikimo.laudiolin.utils.HttpUtils;
 import moe.seikimo.laudiolin.utils.ResourceUtils;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -18,6 +20,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static moe.seikimo.laudiolin.utils.HttpUtils.INTERNAL_ERROR;
 import static moe.seikimo.laudiolin.utils.HttpUtils.RATE_LIMITED;
 
 public interface SiteRouter {
@@ -64,6 +67,7 @@ public interface SiteRouter {
         javalin.get("/Playlist.png", (ctx) -> ctx
                 .contentType(ContentType.IMAGE_JPEG)
                 .result(PLAYLIST_IMAGE.get()));
+        javalin.get("/storage/{id}", SiteRouter::resolveFile);
         javalin.before(SiteRouter::rateLimit);
     }
 
@@ -131,6 +135,35 @@ public interface SiteRouter {
 
         // Increment the amount of requests.
         RATE_LIMITS.put(ip, requests + 1);
+    }
+
+    /**
+     * Resolves a file from the storage directory.
+     *
+     * @param ctx The context.
+     */
+    static void resolveFile(Context ctx) {
+        var fileId = ctx.pathParam("id");
+        if (fileId.length() != 16) {
+            ctx.status(404);
+            return;
+        }
+
+        var filePath = fileId + ".png";
+        var file = new File(Config.get().getStoragePath(), filePath);
+        if (!file.exists()) {
+            ctx.status(404);
+            return;
+        }
+
+        try {
+            ctx
+                    .contentType(ContentType.IMAGE_JPEG)
+                    .header("Cache-Control", "public, max-age=604800, immutable")
+                    .result(new FileInputStream(file));
+        } catch (Exception exception) {
+            ctx.status(500).json(INTERNAL_ERROR(exception.getMessage()));
+        }
     }
 
     /**

@@ -8,6 +8,7 @@ import moe.seikimo.laudiolin.enums.Source;
 import moe.seikimo.laudiolin.models.data.Playlist;
 import moe.seikimo.laudiolin.models.data.TrackData;
 import moe.seikimo.laudiolin.models.data.User;
+import moe.seikimo.laudiolin.objects.JObject;
 import moe.seikimo.laudiolin.utils.AccountUtils;
 import moe.seikimo.laudiolin.utils.DatabaseUtils;
 import moe.seikimo.laudiolin.utils.EncodingUtils;
@@ -30,6 +31,7 @@ public interface PlaylistRouter {
         javalin.get("/playlist/{id}", PlaylistRouter::fetchPlaylist);
         javalin.patch("/playlist/{id}", PlaylistRouter::updatePlaylist);
         javalin.delete("/playlist/{id}", PlaylistRouter::deletePlaylist);
+        javalin.post("/playlist/{id}/icon", PlaylistRouter::updatePlaylistIcon);
     }
 
     /**
@@ -364,6 +366,58 @@ public interface PlaylistRouter {
             ctx.status(200).json(SUCCESS());
         } catch (Exception exception) {
             Laudiolin.getLogger().error("Unable to save playlist.", exception);
+            ctx.status(500).json(INTERNAL_ERROR());
+        }
+    }
+
+    /**
+     * Changes the playlist's icon.
+     *
+     * @param ctx The Javalin context.
+     */
+    private static void updatePlaylistIcon(Context ctx) {
+        try {
+            // Get the user.
+            var user = AccountUtils.getUser(ctx);
+            if (user == null) return;
+
+            // Pull parameters.
+            var id = ctx.pathParam("id");
+
+            // Validate parameters.
+            if (id.isEmpty()) {
+                ctx.status(400).json(INVALID_ARGUMENTS("No ID provided."));
+                return;
+            }
+
+            // Get the playlist from the database.
+            var playlist = Playlist.getPlaylistById(id);
+            if (playlist == null) {
+                ctx.status(404).json(NO_RESULTS());
+                return;
+            }
+
+            // Check if the user is the owner.
+            if (!Objects.equals(user.getUserId(), playlist.getOwner())) {
+                ctx.status(403).json(NO_AUTHORIZATION());
+                return;
+            }
+
+            // Pull the icon from the body.
+            var icon = ctx.body();
+            if (icon.isEmpty()) {
+                ctx.status(400).json(INVALID_ARGUMENTS("No icon provided."));
+                return;
+            }
+
+            // Update the playlist's icon.
+            playlist.setIconRaw(icon);
+
+            // Return the playlist's icon URL.
+            ctx.status(200).json(JObject.c()
+                    .add("url", playlist.getIcon())
+                    .gson());
+        } catch (Exception exception) {
             ctx.status(500).json(INTERNAL_ERROR());
         }
     }

@@ -5,14 +5,19 @@ import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import moe.seikimo.laudiolin.Config;
 import moe.seikimo.laudiolin.interfaces.DatabaseObject;
 import moe.seikimo.laudiolin.objects.JObject;
 import moe.seikimo.laudiolin.utils.Assertions;
 import moe.seikimo.laudiolin.utils.DatabaseUtils;
 import moe.seikimo.laudiolin.utils.EncodingUtils;
+import moe.seikimo.laudiolin.utils.RandomUtils;
 import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -99,8 +104,59 @@ public class Playlist implements DatabaseObject<Playlist> {
     private boolean isPrivate;
     @NotNull private List<TrackData> tracks = new ArrayList<>();
 
+    private String iconId = null;
+
     public Playlist() {
         // Empty constructor for Morphia.
+    }
+
+    /**
+     * Sets the playlist's image from a Base64-encoded image.
+     *
+     * @param image The Base64-encoded image.
+     */
+    public void setIconRaw(String image) throws IOException {
+        // Decode the image.
+        var imageData = EncodingUtils.base64Decode(image);
+
+        if (this.iconId != null) {
+            // Check if the file exists on the system.
+            var file = new File(
+                    Config.get().getStoragePath(),
+                    this.iconId + ".png");
+
+            if (file.exists() && !file.delete()) {
+                throw new IllegalStateException("Failed to delete the old playlist icon.");
+            }
+        }
+
+        // Save the image to the system.
+        var iconId = RandomUtils.randomString(16);
+        var file = new File(
+                Config.get().getStoragePath(),
+                iconId + ".png");
+        Files.write(file.toPath(), imageData);
+
+        // Set the new icon ID.
+        this.iconId = iconId;
+        this.icon = Config.get().getAppTarget() + "/storage/" + iconId;
+
+        this.save();
+    }
+
+    @Override
+    public boolean delete() {
+        // Delete the playlist icon.
+        if (this.iconId != null) {
+            var file = new File(
+                    Config.get().getStoragePath(),
+                    this.iconId + ".png");
+            if (file.exists() && !file.delete()) {
+                throw new IllegalStateException("Failed to delete the playlist icon.");
+            }
+        }
+
+        return DatabaseObject.super.delete();
     }
 
     @Override
