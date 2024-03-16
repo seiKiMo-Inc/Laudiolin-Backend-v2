@@ -23,6 +23,8 @@ import static moe.seikimo.laudiolin.utils.HttpUtils.RATE_LIMITED;
 public interface SiteRouter {
     AtomicReference<byte[]> FAVORITE_IMAGE
             = new AtomicReference<>();
+    AtomicReference<byte[]> PLAYLIST_IMAGE
+            = new AtomicReference<>();
 
     Map<String, Integer> RATE_LIMITS
             = new ConcurrentHashMap<>();
@@ -38,6 +40,10 @@ public interface SiteRouter {
         // Load the favorite image.
         var image = ResourceUtils.getResource("Favorite.png");
         FAVORITE_IMAGE.set(image);
+
+        // Load the playlist image.
+        var playlist = ResourceUtils.getResource("Playlist.png");
+        PLAYLIST_IMAGE.set(playlist);
 
         // Set the task for resetting rate limits.
         var limits = Config.get().rateLimits;
@@ -55,6 +61,9 @@ public interface SiteRouter {
         javalin.get("/Favorite.png", (ctx) -> ctx
                 .contentType(ContentType.IMAGE_JPEG)
                 .result(FAVORITE_IMAGE.get()));
+        javalin.get("/Playlist.png", (ctx) -> ctx
+                .contentType(ContentType.IMAGE_JPEG)
+                .result(PLAYLIST_IMAGE.get()));
         javalin.before(SiteRouter::rateLimit);
     }
 
