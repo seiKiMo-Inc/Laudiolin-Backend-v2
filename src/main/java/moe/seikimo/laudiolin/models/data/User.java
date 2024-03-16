@@ -91,6 +91,8 @@ public class User implements DatabaseObject<User> {
 
     @Id private String userId;
 
+    private boolean isDeveloper = false;
+
     @Reference(idOnly = true, ignoreMissing = true, lazy = true)
     private List<Playlist> playlists = new ArrayList<>();
     private List<TrackData> likedSongs = new ArrayList<>();
@@ -141,6 +143,10 @@ public class User implements DatabaseObject<User> {
                 .add("userId", this.getUserId())
                 .add("likedSongs", this.getLikedSongs())
                 .add("recentlyPlayed", this.getRecentlyPlayed());
+
+        if (withPrivate) {
+            baseData.add("isDeveloper", this.isDeveloper());
+        }
 
         // Resolve all public playlists.
         var playlists = withPrivate ? this.getPlaylists() :
