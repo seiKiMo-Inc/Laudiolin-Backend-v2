@@ -13,8 +13,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static moe.seikimo.laudiolin.utils.HttpUtils.INVALID_ARGUMENTS;
-import static moe.seikimo.laudiolin.utils.HttpUtils.SUCCESS;
+import static moe.seikimo.laudiolin.utils.HttpUtils.*;
 
 public interface StreamRouter {
     /**
@@ -152,7 +151,7 @@ public interface StreamRouter {
 
         // Check if the range is valid.
         if (start < 0 || end < 0 || start > end) {
-            ctx.status(400).json(INVALID_ARGUMENTS());
+            ctx.status(400).json(INTERNAL_ERROR("Invalid range of bytes."));
             return;
         }
 
