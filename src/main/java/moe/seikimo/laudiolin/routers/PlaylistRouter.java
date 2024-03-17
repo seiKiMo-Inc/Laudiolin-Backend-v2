@@ -418,7 +418,7 @@ public interface PlaylistRouter {
                     .add("url", playlist.getIcon())
                     .gson());
         } catch (Exception exception) {
-            ctx.status(500).json(INTERNAL_ERROR());
+            ctx.status(500).json(INTERNAL_ERROR(exception.getMessage()));
         }
     }
 
