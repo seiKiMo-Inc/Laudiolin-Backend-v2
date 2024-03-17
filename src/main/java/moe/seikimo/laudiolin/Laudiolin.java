@@ -200,6 +200,7 @@ public final class Laudiolin {
         // Configure CORS.
         config.plugins.enableCors(container ->
                 container.add(CorsPluginConfig::anyHost));
+        config.http.maxRequestSize = (long) 1e7;
     }
 
     /**
