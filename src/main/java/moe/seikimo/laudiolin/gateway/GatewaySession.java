@@ -76,12 +76,8 @@ public final class GatewaySession {
      * @param handler The handler to call.
      */
     public void addListener(String messageType, Function<JsonObject, Boolean> handler) {
-        var list = this.listeners.get(messageType);
-        if (list == null) {
-            list = new CopyOnWriteArrayList<>();
-            this.listeners.put(messageType, list);
-        }
-
+        var list = this.listeners.computeIfAbsent(
+                messageType, k -> new CopyOnWriteArrayList<>());
         list.add(handler);
     }
 
