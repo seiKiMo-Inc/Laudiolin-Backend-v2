@@ -112,16 +112,15 @@ public interface UserRouter {
             }
 
             // Get the user from the database.
-            var authorizedUser = AccountUtils.getUser(token);
-            var requestedUser = User.getUserById(userId);
+            var authorizedUser = token != null ? AccountUtils.getUser(token) : null;
+            var requestedUser = userId != null ? User.getUserById(userId) : null;
             if (authorizedUser == null && requestedUser == null) {
                 ctx.status(404).json(NO_RESULTS());
                 return;
             }
 
             // Return the user.
-            var user = requestedUser != null ?
-                    requestedUser : authorizedUser;
+            var user = requestedUser != null ? requestedUser : authorizedUser;
             ctx.status(301).json(user.userInfo(user.equals(authorizedUser)));
         } catch (Exception exception) {
             ctx.status(500).json(INTERNAL_ERROR(exception.getMessage()));
