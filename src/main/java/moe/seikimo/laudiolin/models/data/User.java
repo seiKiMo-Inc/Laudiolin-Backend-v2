@@ -94,7 +94,7 @@ public class User implements DatabaseObject<User> {
 
     private boolean isDeveloper = false;
 
-    @Reference(idOnly = true, ignoreMissing = true, lazy = true)
+    @Reference(idOnly = true)
     private List<Playlist> playlists = new ArrayList<>();
     private List<TrackData> likedSongs = new ArrayList<>();
     private List<TrackData> recentlyPlayed = new ArrayList<>();
