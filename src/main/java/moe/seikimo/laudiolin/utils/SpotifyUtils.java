@@ -217,48 +217,44 @@ public interface SpotifyUtils {
      * @param url The URL of the playlist.
      * @return The converted playlist.
      */
-    static Playlist playlist(String url) {
-        try {
-            // Extract the ID from the URL.
-            var id = url.split("playlist/")[1];
-            // Fetch the Spotify playlist.
-            var playlist = SPOTIFY.getPlaylist(id)
-                    .build().execute();
-            var tracks = playlist.getTracks();
+    static Playlist playlist(String url) throws Exception {
+        // Extract the ID from the URL.
+        var id = url.split("playlist/")[1];
+        // Fetch the Spotify playlist.
+        var playlist = SPOTIFY.getPlaylist(id)
+                .build().execute();
+        var tracks = playlist.getTracks();
 
-            // Convert the playlist.
-            var converted = new Playlist()
-                    .setName(playlist.getName())
-                    .setDescription(playlist.getDescription())
-                    .setIcon(playlist.getImages()[0].getUrl())
-                    .setPrivate(!playlist.getIsPublicAccess());
-            int offset = 0, limit = tracks.getTotal();
+        // Convert the playlist.
+        var converted = new Playlist()
+                .setName(playlist.getName())
+                .setDescription(playlist.getDescription())
+                .setIcon(playlist.getImages()[0].getUrl())
+                .setPrivate(!playlist.getIsPublicAccess());
+        int offset = 0, limit = tracks.getTotal();
 
-            var items = tracks.getItems();
-            while (true) {
-                for (var item : items) {
-                    if (item.getIsLocal()) continue;
-                    var rawTrack = item.getTrack();
-                    if (!(rawTrack instanceof Track track)) continue;
+        var items = tracks.getItems();
+        while (true) {
+            for (var item : items) {
+                if (item.getIsLocal()) continue;
+                var rawTrack = item.getTrack();
+                if (!(rawTrack instanceof Track track)) continue;
 
-                    // Parse the track.
-                    var parsed = SpotifyUtils.toTrackData(track);
-                    converted.getTracks().add(parsed);
-                }
-
-                // Check if there are more tracks.
-                if (offset < limit) {
-                    offset += items.length;
-                    items = SPOTIFY.getPlaylistsItems(id)
-                            .offset(offset).build().execute()
-                            .getItems();
-                } else break;
+                // Parse the track.
+                var parsed = SpotifyUtils.toTrackData(track);
+                converted.getTracks().add(parsed);
             }
 
-            return converted;
-        } catch (Exception ignored) {
-            return null;
+            // Check if there are more tracks.
+            if (offset < limit) {
+                offset += items.length;
+                items = SPOTIFY.getPlaylistsItems(id)
+                        .offset(offset).build().execute()
+                        .getItems();
+            } else break;
         }
+
+        return converted;
     }
 
     final class AuthorizeTask extends TimerTask {

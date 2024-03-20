@@ -108,8 +108,7 @@ public interface PlaylistRouter {
 
             PlaylistRouter.addPlaylist(ctx, user, playlist);
         } catch (Exception exception) {
-            Laudiolin.getLogger().error("Unable to save playlist.", exception);
-            ctx.status(500).json(INTERNAL_ERROR());
+            ctx.status(500).json(INTERNAL_ERROR(exception.getMessage()));
         }
     }
 
