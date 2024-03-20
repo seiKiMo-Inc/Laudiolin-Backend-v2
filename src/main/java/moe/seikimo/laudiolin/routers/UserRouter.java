@@ -100,32 +100,32 @@ public interface UserRouter {
      * @param ctx The context.
      */
     static void fetchUser(Context ctx) {
-        // Fetch either the current user or the user by ID.
-        var token = ctx.header("authorization");
-        var userId = ctx.pathParamMap().get("id");
+        try {
+            // Fetch either the current user or the user by ID.
+            var token = ctx.header("authorization");
+            var userId = ctx.pathParamMap().get("id");
 
-        // Check if a parameter has been filled.
-        if (token == null && userId == null) {
-            ctx.status(400).json(INVALID_ARGUMENTS());
-            return;
+            // Check if a parameter has been filled.
+            if (token == null && userId == null) {
+                ctx.status(400).json(INVALID_ARGUMENTS());
+                return;
+            }
+
+            // Get the user from the database.
+            var authorizedUser = AccountUtils.getUser(token);
+            var requestedUser = User.getUserById(userId);
+            if (authorizedUser == null && requestedUser == null) {
+                ctx.status(404).json(NO_RESULTS());
+                return;
+            }
+
+            // Return the user.
+            var user = requestedUser != null ?
+                    requestedUser : authorizedUser;
+            ctx.status(301).json(user.userInfo(user.equals(authorizedUser)));
+        } catch (Exception exception) {
+            ctx.status(500).json(INTERNAL_ERROR(exception.getMessage()));
         }
-
-        // Get the user from the database.
-        var authorizedUser = AccountUtils.getUser(token);
-        var requestedUser = User.getUserById(userId);
-        if (authorizedUser == null && requestedUser == null) {
-            ctx.status(404).json(NO_RESULTS());
-            return;
-        }
-
-        // Return the user.
-        var user = requestedUser != null ?
-                requestedUser : authorizedUser;
-        ctx.status(301).json(user.userInfo(
-                token != null && authorizedUser != null &&
-                        userId != null && requestedUser != null &&
-                        requestedUser.getUserId().equals(authorizedUser.getUserId())
-        ));
     }
 
     /**

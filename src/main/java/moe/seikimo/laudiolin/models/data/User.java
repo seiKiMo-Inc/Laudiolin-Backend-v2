@@ -17,6 +17,7 @@ import org.bson.Document;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @Entity(value = "users", useDiscriminator = false)
@@ -100,6 +101,18 @@ public class User implements DatabaseObject<User> {
 
     public User() {
         // Empty constructor for Morphia.
+    }
+
+    /**
+     * Compare this object with another.
+     *
+     * @param other The other object.
+     * @return Whether the objects are equal.
+     */
+    @Override
+    public boolean equals(Object other) {
+        return other instanceof User user &&
+                Objects.equals(this.getUserId(), user.getUserId());
     }
 
     /**
