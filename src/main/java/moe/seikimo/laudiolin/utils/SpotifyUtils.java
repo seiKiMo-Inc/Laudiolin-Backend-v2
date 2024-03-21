@@ -220,6 +220,10 @@ public interface SpotifyUtils {
     static Playlist playlist(String url) throws Exception {
         // Extract the ID from the URL.
         var id = url.split("playlist/")[1];
+        if (id.contains("?")) {
+            // Remove URL arguments.
+            id = id.split("\\?")[0];
+        }
         // Fetch the Spotify playlist.
         var playlist = SPOTIFY.getPlaylist(id)
                 .build().execute();
