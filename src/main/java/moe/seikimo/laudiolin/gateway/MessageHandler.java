@@ -174,10 +174,13 @@ public interface MessageHandler {
                     user.save();
 
                     // Send a gateway message.
-                    session.sendMessage(JObject.c()
+                    var response = JObject.c()
                             .add("type", "recents")
                             .add("recents", newList)
-                            .add("timestamp", System.currentTimeMillis()));
+                            .add("timestamp", System.currentTimeMillis());
+                    // Send the message to all clients.
+                    Gateway.getConnectedUsers(user.getUserId())
+                            .forEach(s -> s.sendMessage(response));
                 }
             }
         }
