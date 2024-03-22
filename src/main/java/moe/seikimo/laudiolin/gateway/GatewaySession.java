@@ -19,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 
@@ -28,7 +29,7 @@ import static moe.seikimo.laudiolin.gateway.Gateway.GATEWAY_PING;
 @Data
 public final class GatewaySession {
     @NotNull private final Session session;
-    private User user = null;
+    private String userId = null;
 
     private String botId = null;
     private String guildId = null;
@@ -60,12 +61,19 @@ public final class GatewaySession {
     @Nullable private GatewaySession listeningWith = null;
 
     /**
+     * Fetches the user associated with this session.
+     */
+    public User getUser() {
+        return User.getUserById(this.getUserId());
+    }
+
+    /**
      * @return The ID of this session.
      */
     public String getId() {
-        return this.user == null ?
-                this.getGuildId() :
-                this.getUser().getUserId();
+        return Objects.requireNonNullElse(
+                this.getUserId(), this.getGuildId()
+        );
     }
 
     /**

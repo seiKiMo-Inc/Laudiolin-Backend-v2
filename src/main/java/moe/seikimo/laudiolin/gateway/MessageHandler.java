@@ -62,7 +62,7 @@ public interface MessageHandler {
         }
 
         // Set the session's data.
-        session.setUser(user);
+        session.setUserId(user.getUserId());
         session.setBroadcastStatus(data.getBroadcast());
         session.setBroadcastPresence(data.getPresence());
 
