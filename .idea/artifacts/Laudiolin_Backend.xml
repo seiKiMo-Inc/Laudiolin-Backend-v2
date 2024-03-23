@@ -74,6 +74,7 @@
       <element id="library" level="project" name="Maven: org.eclipse.jetty:jetty-security:11.0.15" />
       <element id="library" level="project" name="Maven: ch.qos.logback:logback-classic:1.4.8" />
       <element id="library" level="project" name="Maven: org.mongodb:mongodb-driver-legacy:4.8.1" />
+      <element id="library" level="project" name="Maven: com.mpatric:mp3agic:0.9.1" />
     </root>
   </artifact>
 </component>

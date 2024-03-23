@@ -14,7 +14,7 @@ Class-Path: jetty-annotations-11.0.15.jar jackson-core-2.14.2.jar testco
  3.4.jar spotbugs-annotations-4.7.3.jar jakarta.annotation-api-2.1.1.jar
   spotify-web-api-java-8.0.0.jar jetty-server-11.0.15.jar httpclient5-ca
  che-5.2.1.jar Java-WebSocket-1.5.4.jar classgraph-4.8.153.jar docker-ja
- va-transport-zerodep-3.3.0.jar asm-9.5.jar commons-compress-1.23.0.jar 
+ va-transport-zerodep-3.3.0.jar asm-9.5.jar commons-compress-1.23.0.jar
  websocket-servlet-11.0.15.jar junit-4.13.2.jar asm-commons-9.5.jar java
  lin-5.6.1.jar jetty-util-11.0.15.jar jackson-annotations-2.14.2.jar jet
  ty-jakarta-servlet-api-5.0.2.jar jetty-plus-11.0.15.jar httpclient5-5.2
@@ -24,5 +24,4 @@ Class-Path: jetty-annotations-11.0.15.jar jackson-core-2.14.2.jar testco
  rminal-3.21.0.jar httpcore5-5.2.jar jline-3.21.0.jar mongodb-driver-cor
  e-4.8.1.jar mongodb-1.18.2.jar websocket-core-common-11.0.15.jar asm-tr
  ee-9.5.jar jetty-io-11.0.15.jar jetty-security-11.0.15.jar logback-clas
- sic-1.4.8.jar mongodb-driver-legacy-4.8.1.jar
-
+ sic-1.4.8.jar mongodb-driver-legacy-4.8.1.jar mp3agic-0.9.1.jar
