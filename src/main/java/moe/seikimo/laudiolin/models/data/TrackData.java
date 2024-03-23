@@ -116,6 +116,13 @@ public class TrackData {
      * @return The results as a {@link JsonObject}.
      */
     public static JsonObject toResults(List<TrackData> results) {
+        if (results.size() == 1) {
+            return JObject.c()
+                    .add("top", results.get(0))
+                    .add("results", List.of())
+                    .gson();
+        }
+
         return TrackData.toResults(
                 results.get(0),
                 results.subList(1, results.size())

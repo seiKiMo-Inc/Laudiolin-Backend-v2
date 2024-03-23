@@ -56,7 +56,7 @@ public interface SpotifyUtils {
      * @param query The query to search for.
      * @return The search result.
      */
-    static JsonObject search(String query) {
+    static List<TrackData> search(String query) {
         try {
             // Fetch the tracks from the Spotify API.
             var response = SPOTIFY.searchTracks(query)
@@ -64,16 +64,13 @@ public interface SpotifyUtils {
 
             // Parse each individual track, up to 8 + 1 (top).
             var tracks = response.getItems();
-            var results = Arrays.stream(tracks)
+            return Arrays.stream(tracks)
                     .map(SpotifyUtils::toTrackData)
                     .limit(9)
                     .toList();
-
-            // Return the results.
-            return TrackData.toResults(results);
         } catch (Exception exception) {
             Laudiolin.getLogger().warn("Failed to search Spotify for " + query + ".", exception);
-            return null;
+            return List.of();
         }
     }
 

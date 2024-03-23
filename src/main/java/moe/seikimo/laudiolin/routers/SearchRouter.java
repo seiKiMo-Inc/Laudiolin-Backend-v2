@@ -4,9 +4,13 @@ import io.javalin.Javalin;
 import io.javalin.http.Context;
 import moe.seikimo.laudiolin.Laudiolin;
 import moe.seikimo.laudiolin.enums.Source;
+import moe.seikimo.laudiolin.files.LocalFileManager;
+import moe.seikimo.laudiolin.files.LocalTrack;
 import moe.seikimo.laudiolin.models.data.TrackData;
 import moe.seikimo.laudiolin.objects.JObject;
 import moe.seikimo.laudiolin.utils.SpotifyUtils;
+
+import java.util.ArrayList;
 
 import static moe.seikimo.laudiolin.utils.HttpUtils.NO_RESULTS;
 
@@ -36,27 +40,36 @@ public interface SearchRouter {
             engine = "YouTube";
         }
 
+        // Get the local search results.
+        var localResults = LocalFileManager.getLocalTracks().values().stream()
+                .map(LocalTrack::data)
+                .filter(track -> track.getTitle().toLowerCase().contains(query.toLowerCase()))
+                .toList();
+
         // Perform a search request.
         var source = Source.identify(engine, "");
         var node = Laudiolin.getNode();
-        var results = switch (source) {
+        var tracks = switch (source) {
             case UNKNOWN -> null;
             case ALL, YOUTUBE -> {
                 var search = node.youtubeSearch(query, source != Source.ALL);
-                yield TrackData.toResults(search.stream()
+                yield search.stream()
                         .map(TrackData::toTrack)
-                        .toList());
+                        .toList();
             }
             case SPOTIFY -> SpotifyUtils.search(query);
         };
 
-        if (results == null) {
+        if (tracks == null) {
             ctx.status(404).json(NO_RESULTS());
         } else {
+            tracks = new ArrayList<>(tracks);
+            tracks.addAll(localResults);
+
             ctx
                     .status(301)
                     .header("Cache-Control", "public, max-age=86400")
-                    .json(results);
+                    .json(TrackData.toResults(tracks));
         }
     }
 
@@ -81,7 +94,13 @@ public interface SearchRouter {
             var source = Source.identify(engine, id);
             var node = Laudiolin.getNode();
             var results = switch (source) {
-                case UNKNOWN -> null;
+                case UNKNOWN -> {
+                    // Check if the file is local.
+                    var track = LocalFileManager.getLocalTracks().get(id);
+                    if (track == null) yield null;
+
+                    yield track.data();
+                }
                 case ALL, YOUTUBE -> {
                     var track = node.youtubeFetch(id);
                     yield TrackData.toTrack(track);
