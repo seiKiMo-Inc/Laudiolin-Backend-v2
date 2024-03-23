@@ -154,6 +154,7 @@ public final class Laudiolin {
                 javalin.exception(Exception.class, SiteRouter::handleException);
 
                 // Configure routers.
+                FileRouter.configure(javalin);
                 SiteRouter.configure(javalin);
                 UserRouter.configure(javalin);
                 ProxyRouter.configure(javalin);
