@@ -64,13 +64,15 @@ public interface SearchRouter {
         if (tracks == null) {
             ctx.status(404).json(NO_RESULTS());
         } else {
-            tracks = new ArrayList<>(tracks);
-            tracks.addAll(localResults);
+            var results = new ArrayList<>(localResults);
+            if (Config.get().getStorage().isSearchRemote()) {
+                results.addAll(tracks);
+            }
 
             ctx
                     .status(301)
                     .header("Cache-Control", "public, max-age=86400")
-                    .json(TrackData.toResults(tracks));
+                    .json(TrackData.toResults(results));
         }
     }
 
