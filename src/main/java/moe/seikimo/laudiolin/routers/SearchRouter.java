@@ -2,6 +2,7 @@ package moe.seikimo.laudiolin.routers;
 
 import io.javalin.Javalin;
 import io.javalin.http.Context;
+import moe.seikimo.laudiolin.Config;
 import moe.seikimo.laudiolin.Laudiolin;
 import moe.seikimo.laudiolin.enums.Source;
 import moe.seikimo.laudiolin.files.LocalFileManager;
@@ -118,7 +119,12 @@ public interface SearchRouter {
             if (results == null) {
                 ctx.status(404).json(NO_RESULTS());
             } else {
-                ctx.status(301).json(results);
+                if (!Config.get().storage.searchRemote &&
+                        source != Source.UNKNOWN) {
+                    ctx.status(404).json(NO_RESULTS());
+                } else {
+                    ctx.status(301).json(results);
+                }
             }
         } catch (Exception ignored) {
             ctx.status(404).json(NO_RESULTS());

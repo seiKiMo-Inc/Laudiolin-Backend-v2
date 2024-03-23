@@ -4,6 +4,7 @@ import io.javalin.Javalin;
 import io.javalin.http.ContentType;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
+import moe.seikimo.laudiolin.Config;
 import moe.seikimo.laudiolin.Laudiolin;
 import moe.seikimo.laudiolin.enums.Source;
 import moe.seikimo.laudiolin.files.LocalFileManager;
@@ -49,6 +50,11 @@ public interface StreamRouter {
             var localFile = LocalFileManager.getLocalTracks().get(id);
             if (localFile != null) {
                 return localFile.trackFile().getAbsolutePath();
+            }
+
+            if (!Config.get().getStorage().isHostRemote()) {
+                ctx.status(404).json(NO_RESULTS());
+                return null;
             }
 
             // Identify source.
@@ -177,6 +183,10 @@ public interface StreamRouter {
 
             // Check if the ID is a local file.
             var localFile = LocalFileManager.getLocalTracks().get(id);
+            if (!Config.get().getStorage().isHostRemote() && localFile == null) {
+                ctx.status(404).json(NO_RESULTS());
+                return;
+            }
 
             // Validate the data.
             if (data == null && localFile == null) {
