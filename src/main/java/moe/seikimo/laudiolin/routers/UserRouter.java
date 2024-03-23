@@ -8,7 +8,7 @@ import moe.seikimo.laudiolin.models.data.TrackData;
 import moe.seikimo.laudiolin.models.data.User;
 import moe.seikimo.laudiolin.utils.AccountUtils;
 import moe.seikimo.laudiolin.utils.EncodingUtils;
-import moe.seikimo.laudiolin.utils.ResourceUtils;
+import moe.seikimo.laudiolin.utils.FileUtils;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -24,7 +24,7 @@ public interface UserRouter {
      */
     static void configure(Javalin javalin) {
         // Load the authorize script.
-        var script = ResourceUtils.getResource("scripts/authorize.html");
+        var script = FileUtils.getResource("scripts/authorize.html");
         AUTHORIZE_SCRIPT.set(new String(script));
 
         javalin.get("/login", UserRouter::authorize);

@@ -10,6 +10,7 @@ import io.javalin.config.JavalinConfig;
 import io.javalin.json.JavalinGson;
 import io.javalin.plugin.bundled.CorsPluginConfig;
 import lombok.Getter;
+import moe.seikimo.laudiolin.files.LocalFileManager;
 import moe.seikimo.laudiolin.gateway.Gateway;
 import moe.seikimo.laudiolin.gateway.PeerSignaling;
 import moe.seikimo.laudiolin.objects.Constants;
@@ -83,11 +84,17 @@ public final class Laudiolin {
                 if (!storageFile.exists() && !storageFile.mkdirs()) {
                     throw new IOException("Failed to create storage directory.");
                 }
+
+                var tracksFile = Constants.TRACKS_PATH;
+                if (!tracksFile.exists() && !tracksFile.mkdirs()) {
+                    throw new IOException("Failed to create tracks directory.");
+                }
             }
 
             {
                 // Initialize systems.
                 SpotifyUtils.initialize();
+                LocalFileManager.initialize();
             }
 
             {

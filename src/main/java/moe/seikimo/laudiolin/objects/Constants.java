@@ -12,4 +12,5 @@ public interface Constants {
     };
 
     File STORAGE_PATH = new File(Config.get().getStoragePath());
+    File TRACKS_PATH = new File(Config.get().getStorage().getTracks());
 }

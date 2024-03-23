@@ -2,9 +2,10 @@ package moe.seikimo.laudiolin.utils;
 
 import moe.seikimo.laudiolin.Laudiolin;
 
+import java.io.File;
 import java.io.IOException;
 
-public interface ResourceUtils {
+public interface FileUtils {
     /**
      * Reads a resource from the specified path.
      *
@@ -18,5 +19,17 @@ public interface ResourceUtils {
         } catch (IOException ignored) {
             return new byte[0];
         }
+    }
+
+    /**
+     * Retrieves the name of a file.
+     *
+     * @param file The file.
+     * @return The name of the file.
+     */
+    static String fileName(File file) {
+        var name = file.getName();
+        return !name.contains(".") ? name :
+                name.substring(0, name.lastIndexOf('.'));
     }
 }

@@ -3,6 +3,8 @@ package moe.seikimo.laudiolin.models.data;
 import com.google.gson.JsonObject;
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.PreLoad;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import moe.seikimo.laudiolin.Messages;
@@ -17,12 +19,14 @@ import java.util.List;
 
 @Data
 @Entity
+@Builder
+@AllArgsConstructor
 @Accessors(chain = true)
 public class TrackData {
-    @NotNull private String id;
-    @NotNull private String title;
-    @NotNull private String artist;
-    @NotNull private String icon, url;
+    private String id;
+    private String title;
+    private String artist;
+    private String icon, url;
     private int duration;
 
     public TrackData() {

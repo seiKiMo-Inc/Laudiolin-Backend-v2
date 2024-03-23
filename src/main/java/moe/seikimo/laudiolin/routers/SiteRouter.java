@@ -7,7 +7,7 @@ import io.javalin.http.servlet.JavalinServletContext;
 import moe.seikimo.laudiolin.Config;
 import moe.seikimo.laudiolin.Laudiolin;
 import moe.seikimo.laudiolin.utils.HttpUtils;
-import moe.seikimo.laudiolin.utils.ResourceUtils;
+import moe.seikimo.laudiolin.utils.FileUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -41,11 +41,11 @@ public interface SiteRouter {
      */
     static void configure(Javalin javalin) {
         // Load the favorite image.
-        var image = ResourceUtils.getResource("Favorite.png");
+        var image = FileUtils.getResource("Favorite.png");
         FAVORITE_IMAGE.set(image);
 
         // Load the playlist image.
-        var playlist = ResourceUtils.getResource("Playlist.png");
+        var playlist = FileUtils.getResource("Playlist.png");
         PLAYLIST_IMAGE.set(playlist);
 
         // Set the task for resetting rate limits.

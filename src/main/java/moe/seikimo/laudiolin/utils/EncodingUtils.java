@@ -8,7 +8,11 @@ import moe.seikimo.laudiolin.interfaces.DatabaseObject;
 import moe.seikimo.laudiolin.objects.JObject;
 
 import java.io.Reader;
+import java.math.BigInteger;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -152,6 +156,29 @@ public interface EncodingUtils {
             return true;
         } catch (Exception e) {
             return false;
+        }
+    }
+
+    /**
+     * Hashes a string using SHA-256.
+     *
+     * @param input The input to hash.
+     * @param length The amount of the has to return.
+     * @return The hashed string.
+     */
+    static String sha256Hash(byte[] input, int length) {
+        try {
+            var digest = MessageDigest.getInstance("SHA-256");
+            var hash = digest.digest(input);
+            var hex = new BigInteger(1, hash).toString(16);
+
+            if (length > 0) {
+                return hex.substring(0, Math.min(hex.length(), length));
+            }
+
+            return hex;
+        } catch (NoSuchAlgorithmException e) {
+            return null;
         }
     }
 }

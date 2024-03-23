@@ -70,6 +70,7 @@ public final class Config {
     public Discord discord = new Discord();
     public Spotify spotify = new Spotify();
     public RateLimits rateLimits = new RateLimits();
+    public Storage storage = new Storage();
 
     @Data
     public static final class SeiKiMo {
@@ -105,5 +106,12 @@ public final class Config {
 
         private List<String> exempt = new ArrayList<>();
         private List<String> whitelist = new ArrayList<>();
+    }
+
+    @Data
+    public static final class Storage {
+        public boolean hostRemote = true; // Toggle to host only local files.
+        public boolean searchRemote = false; // Toggle to search only local files.
+        public String tracks = "tracks"; // This is where songs are located. Must be in MP3 format with proper metadata.
     }
 }
