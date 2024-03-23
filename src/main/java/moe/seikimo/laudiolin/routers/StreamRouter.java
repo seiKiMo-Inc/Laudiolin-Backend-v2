@@ -168,9 +168,17 @@ public interface StreamRouter {
                 return;
             }
 
+            // Check if the ID is a local file.
+            var hostRemote = Config.get().getStorage().isHostRemote();
+            var localFile = LocalFileManager.getLocalTracks().get(id);
+            if (!hostRemote && localFile == null) {
+                ctx.status(404).json(NO_RESULTS());
+                return;
+            }
+
             // Stream the video.
             var node = Laudiolin.getNode();
-            var data = switch (source) {
+            var data = hostRemote ? switch (source) {
                 case UNKNOWN -> null;
                 case ALL, YOUTUBE -> node.youtubeStream(id, quality, start, end);
                 case SPOTIFY -> {
@@ -179,14 +187,7 @@ public interface StreamRouter {
                     // Stream the file.
                     yield node.youtubeStream(id, quality, start, end);
                 }
-            };
-
-            // Check if the ID is a local file.
-            var localFile = LocalFileManager.getLocalTracks().get(id);
-            if (!Config.get().getStorage().isHostRemote() && localFile == null) {
-                ctx.status(404).json(NO_RESULTS());
-                return;
-            }
+            } : null;
 
             // Validate the data.
             if (data == null && localFile == null) {
