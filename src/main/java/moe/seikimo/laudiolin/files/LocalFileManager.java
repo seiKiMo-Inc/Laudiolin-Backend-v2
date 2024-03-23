@@ -52,6 +52,7 @@ public final class LocalFileManager {
         if (files == null) return;
 
         for (var file : files) try {
+            if (file.isDirectory()) continue;
             LocalFileManager.readTrackData(file);
         } catch (Exception exception) {
             LocalFileManager.getLogger().warn("Unable to read local file.", exception);
