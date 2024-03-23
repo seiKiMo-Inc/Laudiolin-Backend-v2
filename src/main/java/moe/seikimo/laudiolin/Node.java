@@ -119,7 +119,7 @@ public final class Node extends WebSocketClient {
         this.write(retcode, sendId, data.build().toByteArray());
 
         try {
-            return future.get(10L, TimeUnit.SECONDS);
+            return future.get(60L, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException ignored) {
             return new byte[0];
         }
