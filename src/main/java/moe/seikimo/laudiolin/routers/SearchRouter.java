@@ -12,6 +12,8 @@ import moe.seikimo.laudiolin.objects.JObject;
 import moe.seikimo.laudiolin.utils.SpotifyUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static moe.seikimo.laudiolin.utils.HttpUtils.NO_RESULTS;
 
@@ -48,9 +50,11 @@ public interface SearchRouter {
                 .toList();
 
         // Perform a search request.
+        var includeRemote = Config.get().getStorage().isSearchRemote();
+
         var source = Source.identify(engine, "");
         var node = Laudiolin.getNode();
-        var tracks = switch (source) {
+        List<TrackData> tracks = includeRemote ? switch (source) {
             case UNKNOWN -> null;
             case ALL, YOUTUBE -> {
                 var search = node.youtubeSearch(query, source != Source.ALL);
@@ -59,13 +63,13 @@ public interface SearchRouter {
                         .toList();
             }
             case SPOTIFY -> SpotifyUtils.search(query);
-        };
+        } : Collections.emptyList();
 
         if (tracks == null) {
             ctx.status(404).json(NO_RESULTS());
         } else {
             var results = new ArrayList<>(localResults);
-            if (Config.get().getStorage().isSearchRemote()) {
+            if (includeRemote) {
                 results.addAll(tracks);
             }
 
