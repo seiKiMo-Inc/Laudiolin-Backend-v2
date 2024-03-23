@@ -111,7 +111,7 @@ public final class Config {
     @Data
     public static final class Storage {
         public boolean hostRemote = true; // Toggle to host only local files.
-        public boolean searchRemote = false; // Toggle to search only local files.
+        public boolean searchRemote = true; // Toggle to search only local files.
         public String tracks = "tracks"; // This is where songs are located. Must be in MP3 format with proper metadata.
     }
 }
