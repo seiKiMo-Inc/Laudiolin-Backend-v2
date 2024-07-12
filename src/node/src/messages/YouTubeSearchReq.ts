@@ -120,8 +120,9 @@ function parseItem(
     if (artist) artists.push(artist);
 
     // Check the artists type.
-    if (item.artists) {
-        for (const artist of item.artists) {
+    if (item.artists || item.authors) {
+        const authors = item.artists ?? item.authors ?? [];
+        for (const artist of authors) {
             if (artist.name) artists.push(artist.name);
         }
     } else if (item.author) {
