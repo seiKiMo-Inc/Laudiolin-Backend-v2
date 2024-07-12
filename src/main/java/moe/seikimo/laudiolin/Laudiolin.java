@@ -206,8 +206,10 @@ public final class Laudiolin {
         config.jsonMapper(new JavalinGson(EncodingUtils.GSON));
 
         // Configure CORS.
-        config.plugins.enableCors(container ->
-                container.add(CorsPluginConfig::anyHost));
+        config.plugins.enableCors(container -> container.add(cfg -> {
+            cfg.anyHost();
+            cfg.path = "*";
+        }));
         config.http.maxRequestSize = (long) 1e7;
     }
 
