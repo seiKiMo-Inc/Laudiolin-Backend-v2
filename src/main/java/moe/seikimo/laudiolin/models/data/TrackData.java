@@ -29,6 +29,11 @@ public class TrackData {
     private String icon, url;
     private int duration;
 
+    /**
+     * When set to 'true', the track is known to be local.
+     */
+    private boolean local;
+
     public TrackData() {
         // Empty constructor for Morphia.
     }
@@ -80,7 +85,8 @@ public class TrackData {
                 .setArtist(track.getString("artist"))
                 .setIcon(track.getString("icon"))
                 .setUrl(track.getString("url"))
-                .setDuration(track.getInteger("duration"));
+                .setDuration(track.getInteger("duration"))
+                .setLocal(false);
     }
 
     /**
@@ -106,7 +112,8 @@ public class TrackData {
                 .setArtist(artists.toString())
                 .setIcon(result.getIcon())
                 .setUrl(result.getUrl())
-                .setDuration(result.getDuration());
+                .setDuration(result.getDuration())
+                .setLocal(false);
     }
 
     /**
