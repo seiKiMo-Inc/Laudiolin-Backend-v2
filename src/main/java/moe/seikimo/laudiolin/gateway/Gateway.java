@@ -25,7 +25,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class Gateway {
-    private static final Logger logger
+    @Getter private static final Logger logger
             = LoggerFactory.getLogger("Gateway");
     private static final Map<String, GatewaySession> sessions
             = new ConcurrentHashMap<>();
@@ -150,7 +150,7 @@ public final class Gateway {
                 ctx.send(GATEWAY_UNKNOWN_MESSAGE(content));
                 ctx.closeSession();
 
-                logger.debug("Unknown gateway message received from {}: {}",
+                logger.warn("Unknown gateway message received from {}: {}",
                         ctx.getSessionId(), messageType);
             } else try {
                 handler.handle(session, content);
@@ -159,9 +159,9 @@ public final class Gateway {
                 ctx.send(GATEWAY_UNKNOWN_MESSAGE(content));
                 ctx.closeSession();
 
-                logger.debug("Encountered error while handling message {} from {}: {}.",
+                logger.warn("Encountered error while handling message {} from {}: {}.",
                         messageType, ctx.getSessionId(), exception.getMessage());
-                logger.debug("Message handling exception caught!", exception);
+                logger.warn("Message handling exception caught!", exception);
             }
         } catch (Exception ignored) {
             ctx.send(INVALID_JSON()); // Send an error message.
