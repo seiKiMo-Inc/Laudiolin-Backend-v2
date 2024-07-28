@@ -69,8 +69,12 @@ public interface MessageHandler {
         // TODO: Remove user from offline list.
         // TODO: Add user to online list.
 
-        // Clear the existing presence.
-        DiscordPresence.apply(user, null);
+        try {
+            // Clear the existing presence.
+            DiscordPresence.apply(user, null);
+        } catch (RuntimeException exception) {
+            Gateway.getLogger().debug("Failed to update rich presence: {}", exception.getMessage());
+        }
 
         // Add the user to the connected users list.
         Gateway.addUser(user.getUserId(), session);
