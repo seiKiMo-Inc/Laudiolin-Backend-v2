@@ -157,6 +157,7 @@ public interface MessageHandler {
             // Add the track to the user's recently played.
             var user = session.getUser();
             var recents = user.getRecentlyPlayed();
+            var newList = new ArrayList<TrackData>();
 
             if (!recents.isEmpty()) {
                 var mostRecent = recents.get(0);
@@ -167,26 +168,28 @@ public interface MessageHandler {
                     recents.add(0, track);
 
                     // Remove any duplicates.
-                    List<TrackData> newList = new ArrayList<>();
                     for (var recentTrack : recents) {
                         if (!newList.contains(recentTrack))
                             newList.add(recentTrack);
                     }
-
-                    // Apply and save the changes.
-                    user.setRecentlyPlayed(newList);
-                    user.save();
-
-                    // Send a gateway message.
-                    var response = JObject.c()
-                            .add("type", "recents")
-                            .add("recents", newList)
-                            .add("timestamp", System.currentTimeMillis());
-                    // Send the message to all clients.
-                    Gateway.getConnectedUsers(user.getUserId())
-                            .forEach(s -> s.sendMessage(response));
                 }
+            } else {
+                // Add the track to the user's recently played.
+                newList.add(track);
             }
+
+            // Apply and save the changes.
+            user.setRecentlyPlayed(newList);
+            user.save();
+
+            // Send a gateway message.
+            var response = JObject.c()
+                    .add("type", "recents")
+                    .add("recents", newList)
+                    .add("timestamp", System.currentTimeMillis());
+            // Send the message to all clients.
+            Gateway.getConnectedUsers(user.getUserId())
+                    .forEach(s -> s.sendMessage(response));
         }
 
         // Update the user's player information.

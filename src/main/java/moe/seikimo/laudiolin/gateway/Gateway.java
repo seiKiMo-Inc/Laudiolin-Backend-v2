@@ -52,6 +52,7 @@ public final class Gateway {
         this.put("setElixir", MessageHandler::setElixir);
         this.put("useElixir", MessageHandler::useElixir);
 
+        // Elixir messages.
         this.put("playing", MessageHandler::playing);
         this.put("paused", MessageHandler::pause);
         this.put("loop", MessageHandler::loop);
