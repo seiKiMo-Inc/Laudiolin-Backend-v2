@@ -78,7 +78,7 @@ public final class LocalFileManager {
         if (fileHash == null || fileHash.length() != 16)
             throw new RuntimeException("Unable to hash track.");
 
-        var coverFile = new File(coversDir, track.getName() + ".png");
+        var coverFile = new File(coversDir, fileName + ".png");
 
         var duration = (int) mp3.getLengthInSeconds();
         var trackUrl = baseUrl + "/track/" + fileHash;
