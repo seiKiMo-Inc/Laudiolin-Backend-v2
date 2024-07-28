@@ -73,10 +73,15 @@ public interface SearchRouter {
                 results.addAll(tracks);
             }
 
-            ctx
-                    .status(301)
-                    .header("Cache-Control", "public, max-age=86400")
-                    .json(TrackData.toResults(results));
+            var response = TrackData.toResults(results);
+            if (response == null) {
+                ctx.status(404).json(NO_RESULTS());
+            } else {
+                ctx
+                        .status(301)
+                        .header("Cache-Control", "public, max-age=86400")
+                        .json(response);
+            }
         }
     }
 

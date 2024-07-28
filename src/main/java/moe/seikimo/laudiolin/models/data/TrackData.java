@@ -17,6 +17,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+import static moe.seikimo.laudiolin.utils.HttpUtils.NO_RESULTS;
+
 @Data
 @Entity
 @Builder
@@ -123,6 +125,9 @@ public class TrackData {
      * @return The results as a {@link JsonObject}.
      */
     public static JsonObject toResults(List<TrackData> results) {
+        if (results.isEmpty()) {
+            return null;
+        }
         if (results.size() == 1) {
             return JObject.c()
                     .add("top", results.get(0))
