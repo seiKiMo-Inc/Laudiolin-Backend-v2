@@ -71,6 +71,7 @@ public final class Config {
     public Spotify spotify = new Spotify();
     public RateLimits rateLimits = new RateLimits();
     public Storage storage = new Storage();
+    public PublicData publicData = new PublicData();
 
     @Data
     public static final class SeiKiMo {
@@ -113,5 +114,10 @@ public final class Config {
         public boolean hostRemote = true; // Toggle to host only local files.
         public boolean searchRemote = true; // Toggle to search only local files.
         public String tracks = "tracks"; // This is where songs are located. Must be in MP3 format with proper metadata.
+    }
+
+    @Data
+    public static final class PublicData {
+        public List<String> playlists = new ArrayList<>(); // This is a list of playlists to appear everywhere.
     }
 }

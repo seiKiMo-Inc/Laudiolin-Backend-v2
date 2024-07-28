@@ -166,9 +166,15 @@ public class User implements DatabaseObject<User> {
                 this.getPlaylists().stream()
                         .filter(playlist -> !playlist.isPrivate())
                         .toList();
-        baseData.add("playlists", playlists.stream()
-                .map(Playlist::getId)
-                .toList());
+        var playlistIds = new ArrayList<>(
+                playlists.stream()
+                        .map(Playlist::getId)
+                        .toList()
+        );
+        // Inject public data.
+        playlistIds.addAll(Config.get().getPublicData().getPlaylists());
+
+        baseData.add("playlists", playlistIds);
 
         return baseData.gson();
     }
