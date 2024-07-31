@@ -119,5 +119,6 @@ public final class Config {
     @Data
     public static final class PublicData {
         public List<String> playlists = new ArrayList<>(); // This is a list of playlists to appear everywhere.
+        public String deleteUrl, tosUrl, privacyUrl;
     }
 }

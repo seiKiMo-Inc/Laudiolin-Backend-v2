@@ -60,6 +60,12 @@ public interface SiteRouter {
         new Timer().scheduleAtFixedRate(
                 new UpdateLimitsTask(), withinTime, withinTime);
 
+        // Configure redirects.
+        var publicData = Config.get().getPublicData();
+        javalin.get("/tos", ctx -> ctx.redirect(publicData.getTosUrl()));
+        javalin.get("/privacy", ctx -> ctx.redirect(publicData.getPrivacyUrl()));
+        javalin.get("/delete", ctx -> ctx.redirect(publicData.getDeleteUrl()));
+
         javalin.get("/", SiteRouter::redirect);
         javalin.get("/Favorite.png", (ctx) -> ctx
                 .contentType(ContentType.IMAGE_JPEG)
