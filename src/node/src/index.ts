@@ -1,11 +1,12 @@
-import { writeFileSync, readFileSync, existsSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 
-import Innertube, { UniversalCache } from "youtubei.js";
+import Innertube, { ClientType, UniversalCache } from "youtubei.js";
 import { Music } from "youtubei.js/dist/src/core/clients";
 
 import { Logger } from "tslog";
 
-import { initialize } from "./java";
+import { initialize } from "@app/java";
+import { generatePoToken } from "@app/utils";
 
 console.clear(); // Clear the terminal screen.
 
@@ -27,11 +28,31 @@ export const storagePath = process.env["STORAGE_PATH"] ?? `${process.cwd()}/file
 // Create a YouTube application.
 export let youtube: Innertube;
 export let ytMusic: Music;
+
+export let search: Innertube;
+export let searchMusic: Music;
+
 (async () => {
+    // Generate an origin token.
+    const [poToken, visitorData] = await generatePoToken();
+
+    // Initialize YouTube instance.
     youtube = await Innertube.create({
-        cache: new UniversalCache(true, storagePath)
+        cache: new UniversalCache(true, storagePath),
+        // client_type: ClientType.WEB_CREATOR,
+        po_token: poToken,
+        visitor_data: visitorData,
+        retrieve_player: true,
+        enable_session_cache: false,
+        generate_session_locally: false
     });
     ytMusic = youtube.music;
+
+    search = await Innertube.create({
+        cache: new UniversalCache(true, storagePath),
+        // client_type: ClientType.WEB_CREATOR
+    });
+    searchMusic = search.music;
 
     // Prepare to do YouTube authentication.
     youtube.session.on("auth-pending", (data) => {

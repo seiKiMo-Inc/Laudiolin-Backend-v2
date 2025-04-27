@@ -3,7 +3,7 @@ import { sendPacket } from "@app/java";
 
 import { WebSocket } from "ws";
 
-import { youtube, ytMusic } from "@app/index";
+import { search as youtube, searchMusic as ytMusic } from "@app/index";
 import { parseVideo } from "@app/utils";
 
 import { YTNodes, YTMusic } from "youtubei.js";

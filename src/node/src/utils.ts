@@ -1,5 +1,10 @@
 import { Track } from "@app/Messages";
-import { YTNodes } from "youtubei.js";
+
+import Innertube, { YTNodes } from "youtubei.js";
+
+import { JSDOM } from "jsdom";
+import { BG } from "bgutils-js";
+import type { BgConfig } from "bgutils-js/dist/utils";
 
 /**
  * Extracts the YouTube video ID from a URL.
@@ -46,4 +51,54 @@ export function parseVideo(video: YTNodes.Video | YTNodes.PlaylistVideo): Track 
         id: video.id,
         duration: video.duration.seconds
     };
+}
+
+/**
+ * Generates a proof of origin token.
+ */
+export async function generatePoToken(): Promise<[string, string]> {
+    // Generate an origin token and accompanying visitor data.
+    const client = await Innertube.create({ retrieve_player: false });
+    const visitorData = client.session.context.client.visitorData;
+    if (!visitorData) {
+        throw new Error("Failed to generate visitor data.");
+    }
+
+    const dom = new JSDOM();
+    Object.assign(globalThis, {
+        window: dom.window,
+        document: dom.window.document
+    });
+
+    const config: BgConfig = {
+        fetch: (url, options) => fetch(url, options),
+        globalObj: globalThis,
+        identifier: visitorData,
+        requestKey: "O43z0dpjhgX20SCx4KAo"
+    };
+
+    const challenge = await BG.Challenge.create(config);
+
+    if (!challenge || !challenge.interpreterJavascript.privateDoNotAccessOrElseSafeScriptWrappedValue) {
+        throw new Error("Failed to generate PoToken.");
+    }
+
+    const script = challenge.interpreterJavascript.privateDoNotAccessOrElseSafeScriptWrappedValue;
+    if (script) {
+        new Function(script)();
+    } else {
+        throw new Error("Could not load VM.");
+    }
+
+    const { poToken } = await BG.PoToken.generate({
+        program: challenge.program,
+        globalName: challenge.globalName,
+        bgConfig: config
+    });
+
+    if (!poToken) {
+        throw new Error("Failed to generate PoToken.");
+    }
+
+    return [poToken, visitorData];
 }

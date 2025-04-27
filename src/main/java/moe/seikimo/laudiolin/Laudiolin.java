@@ -243,6 +243,7 @@ public final class Laudiolin {
                 "node", "node");
 
         var storagePath = Constants.STORAGE_PATH.getAbsolutePath();
+        var youtube = Config.get().getYoutube();
 
         try {
             // Execute the Node instance.
@@ -253,6 +254,8 @@ public final class Laudiolin {
                             "PORT=" + port,
                             "STORAGE_PATH=" + storagePath,
                             "FFMPEG_PATH=" + Config.get().getFfmpegPath(),
+                            "PO_TOKEN=" + youtube.getOriginToken(),
+                            "VISITOR_DATA=" + youtube.getClientData()
                     }
             );
 

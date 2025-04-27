@@ -61,7 +61,8 @@ async function handleMessage(socket: WebSocket, data: Buffer): Promise<void> {
     try {
         await handler(socket, retcode, packetData);
     } catch (error) {
-        console.error(`Error handling packet ${id}.`, error);
+        console.error(`Error handling packet ${id}.`);
+        console.error(error);
     }
 }
 

@@ -7,6 +7,7 @@ import { extractId } from "@app/utils";
 
 import { youtube } from "@app/index";
 import { streamToIterable } from "@app/utils";
+import { Utils } from "youtubei.js";
 
 /**
  * Downloads a portion of a YouTube video.
@@ -33,7 +34,8 @@ async function streamInternal(
         await youtube.download(id, {
             type: "audio", format: "any",
             quality: quality == "High" ? "best" : "bestefficiency",
-            range: { start: min, end: Math.min(max, length) }
+            range: { start: min, end: Math.min(max, length) },
+            client: "YTMUSIC"
         });
 
     // Convert the stream into a buffer.
@@ -50,11 +52,18 @@ export default async function(socket: WebSocket, retcode: number, req: Buffer) {
     if (id.includes("http"))
         id = extractId(id);
 
-    // Attempt to stream the video.
-    const { buffer, length } =
-        await streamInternal(id, quality, start, end);
+    try {
+        // Attempt to stream the video.
+        const { buffer, length } =
+            await streamInternal(id, quality, start, end);
 
-    // Send the response packet.
-    sendPacket(socket, retcode, YouTubeStreamRsp.toBinary(
-        { data: buffer, contentLength: length }));
+        // Send the response packet.
+        sendPacket(socket, retcode, YouTubeStreamRsp.toBinary(
+            { data: buffer, contentLength: length }));
+    } catch (error) {
+        if (error instanceof Utils.InnertubeError) {
+            console.log("Innertube error: ", error.info);
+        }
+        throw error;
+    }
 }

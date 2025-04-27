@@ -69,6 +69,7 @@ public final class Config {
     public Elixir elixir = new Elixir();
     public Discord discord = new Discord();
     public Spotify spotify = new Spotify();
+    public YouTube youtube = new YouTube();
     public RateLimits rateLimits = new RateLimits();
     public Storage storage = new Storage();
     public PublicData publicData = new PublicData();
@@ -95,6 +96,12 @@ public final class Config {
     public static final class Spotify {
         private String clientId;
         private String clientSecret;
+    }
+
+    @Data
+    public static final class YouTube {
+        private String originToken;
+        private String clientData;
     }
 
     @Data

@@ -8,6 +8,7 @@ import { join } from "path";
 
 import { youtube, storagePath } from "@app/index";
 import { extractId, streamToIterable } from "@app/utils";
+import { Utils } from "youtubei.js";
 
 /**
  * Handles the downloading of a YouTube video.
@@ -27,7 +28,8 @@ async function downloadInternal(id: string): Promise<string> {
     const stream = await youtube.download(id, {
         type: "audio",
         quality: "best",
-        format: "any"
+        format: "any",
+        client: "YTMUSIC"
     });
 
     // Write the stream to a temporary file.
@@ -66,10 +68,17 @@ export default async function(socket: WebSocket, retcode: number, req: Buffer){
     if (id.includes("http"))
         id = extractId(id);
 
-    // Get the file path.
-    const filePath = await downloadInternal(id);
+    try {
+        // Get the file path.
+        const filePath = await downloadInternal(id);
 
-    // Send the response packet.
-    sendPacket(socket, retcode,
-        YouTubeDownloadRsp.toBinary({ filePath }));
+        // Send the response packet.
+        sendPacket(socket, retcode,
+            YouTubeDownloadRsp.toBinary({ filePath }));
+    } catch (error) {
+        if (error instanceof Utils.InnertubeError) {
+            console.log("Innertube error: ", error.info);
+        }
+        throw error;
+    }
 }
