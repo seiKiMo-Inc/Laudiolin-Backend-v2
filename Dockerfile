@@ -81,5 +81,8 @@ COPY --from=node /node/dist/index.js index.js
 # Expose the web server port.
 EXPOSE 3000
 
+# Mark the application as 'headless'.
+ENV HEADLESS=true
+
 # Run the Java application.
 CMD ["java", "-jar", "Laudiolin-Backend.jar"]

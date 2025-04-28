@@ -44,6 +44,12 @@ public final class Laudiolin {
     static {
         // Set logback configuration file.
         System.setProperty("logback.configurationFile", "logback.xml");
+
+        // Load variables from the .env file.
+        for (var entry : System.getenv().entrySet()) {
+            // Set the environment variable.
+            System.setProperty(entry.getKey(), entry.getValue());
+        }
     }
 
     @Getter private static final Logger logger
@@ -117,7 +123,7 @@ public final class Laudiolin {
                 Laudiolin.node.connect();
             }
 
-            {
+            if (!Properties.HEADLESS_ENVIRONMENT) {
                 // Start the console.
                 Laudiolin.getConsole();
                 new Thread(Laudiolin::startConsole).start();
