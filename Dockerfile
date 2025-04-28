@@ -18,6 +18,7 @@ RUN mvn dependency:go-offline -B
 COPY src ./src
 
 # Run the Protobuf compiler.
+RUN mkdir -p src/main/generated
 RUN protoc --java_out=src/main/generated src/Messages.proto
 
 # Build the application.
