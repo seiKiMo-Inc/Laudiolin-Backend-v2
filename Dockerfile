@@ -57,6 +57,9 @@ RUN npm run build
 # ------------------------------ RUN ------------------------------
 FROM ubuntu:22.04 as run
 
+# Set the working directory.
+WORKDIR /app
+
 # Update the package list.
 RUN apt-get update
 
@@ -70,10 +73,10 @@ RUN apt install -y curl \
   && curl -L https://www.npmjs.com/install.sh | sh
 
 # Copy the Java application from the build stage.
-COPY --from=java /app/target/Laudiolin-Backend-*.jar /app/Laudiolin-Backend.jar
+COPY --from=java /app/target/Laudiolin-Backend-*.jar Laudiolin-Backend.jar
 
 # Copy the Node.js application from the build stage.
-COPY --from=node /node/dist/index.js /app/index.js
+COPY --from=node /node/dist/index.js index.js
 
 # Expose the web server port.
 EXPOSE 3000
