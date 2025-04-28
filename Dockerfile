@@ -39,7 +39,7 @@ WORKDIR /node
 COPY src/node .
 
 # Install the helper executables.
-RUN npm install -g @protobuf-ts/plugin @vercel/ncc
+RUN npm install -g @protobuf-ts/plugin @vercel/ncc typescript
 
 # Copy the Protobuf file into the container.
 COPY src/Messages.proto .
